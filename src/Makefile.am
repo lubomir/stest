@@ -1,3 +1,3 @@
 bin_PROGRAMS = stest
 
-stest_SOURCES = main.c
+stest_SOURCES = main.c list.c
