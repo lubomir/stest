@@ -47,11 +47,6 @@ List * list_reverse(List *list)
     return new;
 }
 
-void * list_get_data(List *list)
-{
-    return list == NULL ? NULL : list->data;
-}
-
 void list_foreach(List *list, CbFunc cb, void *data)
 {
     while (list != NULL) {

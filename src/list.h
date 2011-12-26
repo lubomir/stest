@@ -43,8 +43,6 @@ List * list_append(List *list, void *data);
  */
 List * list_reverse(List *list);
 
-void * list_get_data(List *list);
-
 /**
  * Call function for each stored piece of data. Callback function should
  * accept two parameters - the first is the data from the list, the second
