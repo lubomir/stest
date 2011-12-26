@@ -70,30 +70,36 @@ List * test_load_from_dir(const char *dir)
     Test *test;
     char *dot;
     size_t len;
+    enum TestPart tp;
 
     files_num = scandir(dir, &entries, filter_tests, number_sort);
 
-    for (i = 0; i < files_num; i++) {
+    for (i = 0; i < files_num;) {
         test = malloc(sizeof(Test));
         test->parts = 0;
         dot = strchr(entries[i]->d_name, '.');
+        if (dot == NULL) {
+            free(entries[i]);
+            continue;
+        }
         len = dot - entries[i]->d_name;
         test->name = calloc(len + 1, sizeof(char));
         strncpy(test->name, entries[i]->d_name, len);
 
         while (i < files_num && strncmp(test->name, entries[i]->d_name, len) == 0) {
-            test->parts |= get_test_part(entries[i]->d_name);
+            tp = get_test_part(entries[i]->d_name);
+            if (tp != TEST_UNKNOWN) {
+                test->parts |= tp;
+            }
             free(entries[i]);
             i++;
         }
-        i--;
 
         tests = list_prepend(tests, test);
     }
 
     free(entries);
-    tests = list_reverse(tests);
-    return tests;
+    return list_reverse(tests);
 }
 
 void test_free(Test *test)
