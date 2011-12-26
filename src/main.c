@@ -11,6 +11,8 @@
 #include <ctype.h>
 #include <string.h>
 
+#include "list.h"
+
 #define return_val_if_fail(x,v) do { if (!(x)) return v; } while (0)
 
 enum TestPart {
@@ -72,19 +74,38 @@ enum TestPart get_test_part(const char *filename)
     return TEST_UNKNOWN;
 }
 
-Test * load_tests(const char *dir)
+List * load_tests(const char *dir)
 {
     struct dirent **entries;
-    int i;
+    int i, files_num;
+    List *tests = NULL;
+    Test *test;
+    char *dot;
+    size_t len;
 
-    scandir(dir, &entries, filter_tests, number_sort);
+    files_num = scandir(dir, &entries, filter_tests, number_sort);
 
-    for (i = 0; entries[i] != NULL; i++) {
-        printf("Found test: %s\n", entries[i]->d_name);
-        free(entries[i]);
+    for (i = 0; i < files_num; i++) {
+        test = malloc(sizeof(Test));
+        test->parts = 0;
+        dot = strchr(entries[i]->d_name, '.');
+        len = dot - entries[i]->d_name;
+        test->name = calloc(len + 1, sizeof(char));
+        strncpy(test->name, entries[i]->d_name, len);
+
+        while (i < files_num && strncmp(test->name, entries[i]->d_name, len) == 0) {
+            test->parts |= get_test_part(entries[i]->d_name);
+            free(entries[i]);
+            i++;
+        }
+        i--;
+
+        tests = list_prepend(tests, test);
     }
 
     free(entries);
+    tests = list_reverse(tests);
+    return tests;
 }
 
 int run_program(const char *cmd)
@@ -105,6 +126,21 @@ int run_program(const char *cmd)
     return WIFEXITED(status) ? WEXITSTATUS(status) : WTERMSIG(status);
 }
 
+void test_free(void * t)
+{
+    Test *test = (Test *) t;
+    if (test) {
+        free(test->name);
+    }
+    free(test);
+}
+
+void test_cb(void *_test, void *data)
+{
+    Test *test = (Test *) _test;
+    printf("Test %s:\n", test->name);
+}
+
 int main(int argc, char *argv[])
 {
     struct stat info;
@@ -114,7 +150,9 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    load_tests("tests");
+    List *tests = load_tests("tests");
+    list_foreach(tests, test_cb, NULL);
+    list_destroy(tests, test_free);
     return 0;
 
     if (stat(argv[1], &info) == -1) {
