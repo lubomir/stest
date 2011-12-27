@@ -1,6 +1,14 @@
+#define _POSIX_C_SOURCE 200809L
+
 #include "test.h"
 
 #define return_val_if_fail(x,v) do { if (!(x)) return v; } while (0)
+
+struct test_context_t {
+    char *cmd;
+    char *dir;
+    List *results;
+};
 
 /**
  * Compare two filenames based on leading digits.
@@ -108,4 +116,35 @@ void test_free(Test *test)
         free(test->name);
         free(test);
     }
+}
+
+TestContext * test_context_new(const char *cmd, const char *dir)
+{
+    TestContext *tc = malloc(sizeof(TestContext));
+    tc->cmd = strdup(cmd);
+    tc->dir = strdup(dir);
+    tc->results = NULL;
+    return tc;
+}
+
+void test_context_free(TestContext *tc)
+{
+    if (tc) {
+        free(tc->cmd);
+        free(tc->dir);
+        list_destroy(tc->results, DESTROYFUNC(test_free));
+    }
+    free(tc);
+}
+
+void run_test(Test *t, TestContext *tc)
+{
+    printf("Running test %s\n", t->name);
+}
+
+List * test_context_run_tests(TestContext *tc, List *tests)
+{
+    list_foreach(tests, CBFUNC(run_test), tc);
+    tc->results = list_reverse(tc->results);
+    return tc->results;
 }

@@ -27,17 +27,6 @@ int run_program(const char *cmd)
     return WIFEXITED(status) ? WEXITSTATUS(status) : WTERMSIG(status);
 }
 
-void free_cb(void * t)
-{
-    test_free((Test *) t);
-}
-
-void test_cb(void *_test, void *data)
-{
-    Test *test = (Test *) _test;
-    printf("Test %s:\n", test->name);
-}
-
 int main(int argc, char *argv[])
 {
     struct stat info;
@@ -48,24 +37,20 @@ int main(int argc, char *argv[])
     }
 
     List *tests = test_load_from_dir("tests");
-    list_foreach(tests, test_cb, NULL);
-    list_destroy(tests, free_cb);
-    return 0;
 
     if (stat(argv[1], &info) == -1) {
         perror("stat");
         exit(EXIT_FAILURE);
     }
-    if (info.st_mode & S_IXUSR != S_IXUSR) {
+    if ((info.st_mode & S_IXUSR) != S_IXUSR) {
         fprintf(stderr, "Can not execute '%s'\n", argv[1]);
         exit(EXIT_FAILURE);
     }
 
-    if (run_program(argv[1]) == 0) {
-        printf("OK\n");
-    } else {
-        printf("Bad\n");
-    }
+    TestContext *tc = test_context_new(argv[1], "tests");
+    test_context_run_tests(tc, tests);
+    list_destroy(tests, DESTROYFUNC(test_free));
+    test_context_free(tc);
 
     return 0;
 }

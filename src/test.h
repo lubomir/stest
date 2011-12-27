@@ -34,6 +34,8 @@ struct test_result_t {
     char *retval;
 };
 
+typedef struct test_context_t TestContext;
+
 /**
  * Load all test definitions from a directory.
  *
@@ -48,5 +50,31 @@ List * test_load_from_dir(const char *dir);
  * @param test  test to be freed
  */
 void test_free(Test *test);
+
+/**
+ * Create new test context to run tests in.
+ *
+ * @param cmd   command to be tested
+ * @param dir   directory where tests are stored
+ * @return      new TestContext
+ */
+TestContext * test_context_new(const char *cmd, const char *dir);
+
+/**
+ * Free memory used by TestContext.
+ *
+ * @param tc    TestContext to be freed
+ */
+void test_context_free(TestContext *tc);
+
+/**
+ * Run list of tests in given context.
+ * Returns a list of test results.
+ *
+ * @param tc    context to run in
+ * @param tests tests to be executed (list of Test objects)
+ * @return list of TestResult objects
+ */
+List * test_context_run_tests(TestContext *tc, List *tests);
 
 #endif /* end of include guard: TEST_H */

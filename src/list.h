@@ -15,11 +15,19 @@ struct _list {
  * Function to call for each stored piece of data.
  */
 typedef void (*CbFunc) (void *, void *);
+/**
+ * Cast a function to CbFunc.
+ */
+#define CBFUNC(x) ((void(*)(void*,void*))(x))
 
 /**
  * Function to free stored data.
  */
 typedef void (*DestroyFunc) (void *);
+/**
+ * Cast a function to DestroyFunc.
+ */
+#define DESTROYFUNC(x) ((void(*)(void*))x)
 
 /**
  * Prepend item to the start of the list.
