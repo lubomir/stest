@@ -6,6 +6,10 @@
 #include <stdlib.h>
 
 typedef struct _list List;
+struct _list {
+    void *data;
+    List *next;
+};
 
 /**
  * Function to call for each stored piece of data.

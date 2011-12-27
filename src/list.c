@@ -1,10 +1,5 @@
 #include "list.h"
 
-struct _list {
-    void *data;
-    List *next;
-};
-
 List * list_prepend(List *list, void *data)
 {
     List *new = malloc(sizeof(List));
@@ -25,12 +20,13 @@ List * list_append(List *list, void *data)
     new->data = data;
     new->next = NULL;
 
-    while (list != NULL) {
-        tmp = list;
-        list = list->next;
+    tmp = list;
+    while (tmp->next != NULL) {
+        tmp = tmp->next;
     }
 
     tmp->next = new;
+    return list;
 }
 
 List * list_reverse(List *list)
