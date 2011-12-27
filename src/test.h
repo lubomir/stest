@@ -27,6 +27,13 @@ struct test_t {
     uint8_t parts;
 };
 
+typedef struct test_result_t TestResult;
+struct test_result_t {
+    char *output_diff;
+    char *errors_diff;
+    char *retval;
+};
+
 /**
  * Load all test definitions from a directory.
  *
@@ -34,5 +41,12 @@ struct test_t {
  * @return      list of tests
  */
 List * test_load_from_dir(const char *dir);
+
+/**
+ * Free a test.
+ *
+ * @param test  test to be freed
+ */
+void test_free(Test *test);
 
 #endif /* end of include guard: TEST_H */
