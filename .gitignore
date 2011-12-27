@@ -2,17 +2,22 @@ Makefile
 Makefile.in
 aclocal.m4
 autom4te.cache
+config
 config.h
 config.log
 config.status
 configure
 depcomp
 install-sh
+libtool
 missing
 stamp-h1
 
 src/stest
-src/.deps
+*/.deps
+*/.libs
 
 *.swp
 *.o
+*.la
+*.lo
