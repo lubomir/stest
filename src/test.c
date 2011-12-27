@@ -1,5 +1,10 @@
 #define _POSIX_C_SOURCE 200809L
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+
 #include "test.h"
 
 #define return_val_if_fail(x,v) do { if (!(x)) return v; } while (0)
@@ -137,9 +142,70 @@ void test_context_free(TestContext *tc)
     free(tc);
 }
 
+int test_context_get_fd(TestContext *tc, Test *t)
+{
+    int fd;
+    char input_file[strlen(tc->dir) + strlen(t->name) + 5];
+    if ((t->parts & TEST_INPUT) != TEST_INPUT) {
+        fd = open("/dev/null", O_RDONLY);
+    } else {
+        sprintf(input_file, "%s/%s.in", tc->dir, t->name);
+        fd = open(input_file, O_RDONLY);
+    }
+    if (fd < 0) {
+        perror("open");
+        exit(EXIT_FAILURE);
+    }
+    return fd;
+}
+
+void analyze_test_run(TestContext *tc, Test *test,
+        const char *out_file, const char *err_file, int status)
+{
+    unlink(out_file);
+    unlink(err_file);
+}
+
 void run_test(Test *t, TestContext *tc)
 {
     printf("Running test %s\n", t->name);
+    int stdin_fd, stdout_fd, stderr_fd;
+    stdin_fd = test_context_get_fd(tc, t);
+    char stdout_file[] = "/tmp/stest-stdout-XXXXXX";
+    char stderr_file[] = "/tmp/stest-stderr-XXXXXX";
+    stdout_fd = mkstemp(stdout_file);
+    if (stdout_fd < 0) {
+        perror("mkstemp");
+        exit(EXIT_FAILURE);
+    }
+    stderr_fd = mkstemp(stderr_file);
+    if (stderr_fd < 0) {
+        perror("mkstemp");
+        exit(EXIT_FAILURE);
+    }
+
+    pid_t child;
+    int status;
+
+    child = fork();
+    if (child == -1) {
+        perror("fork");
+        exit(EXIT_FAILURE);
+    } else if (child == 0) {    /* Child */
+        dup2(stdin_fd, STDIN_FILENO);
+        dup2(stdout_fd, STDOUT_FILENO);
+        dup2(stderr_fd, STDERR_FILENO);
+        execl(tc->cmd, tc->cmd, NULL);
+        perror("exec");
+        exit(EXIT_FAILURE);
+    }                           /* Parent */
+    close(stdin_fd);
+    close(stdout_fd);
+    close(stderr_fd);
+
+    wait(&status);
+
+    analyze_test_run(tc, t, stdout_file, stderr_file, status);
 }
 
 List * test_context_run_tests(TestContext *tc, List *tests)

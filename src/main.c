@@ -1,31 +1,10 @@
 #include "config.h"
 
 #include <stdio.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
 #include <sys/stat.h>
 
 #include "list.h"
 #include "test.h"
-
-int run_program(const char *cmd)
-{
-    pid_t child;
-    int status;
-
-    child = fork();
-    if (child == -1) {
-        perror("fork");
-        exit(EXIT_FAILURE);
-    } else if (child == 0) {    /* Child */
-        execl(cmd, cmd, NULL);
-        perror("exec");
-        exit(EXIT_FAILURE);
-    }                           /* Parent */
-    wait(&status);
-    return WIFEXITED(status) ? WEXITSTATUS(status) : WTERMSIG(status);
-}
 
 int main(int argc, char *argv[])
 {
