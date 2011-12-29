@@ -14,6 +14,9 @@ struct test_context_t {
     char *cmd;
     char *dir;
     int logfd[2];
+    unsigned int test_num;
+    unsigned int check_num;
+    unsigned int check_failed;
 };
 
 enum {
@@ -133,6 +136,9 @@ TestContext * test_context_new(const char *cmd, const char *dir)
 {
     TestContext *tc = malloc(sizeof(TestContext));
     tc->cmd = strdup(cmd);
+    tc->test_num = 0;
+    tc->check_num = 0;
+    tc->check_failed = 0;
     tc->dir = strdup(dir);
     if (pipe(tc->logfd) < 0) {
         perror("pipe");
@@ -168,13 +174,14 @@ int test_context_get_fd(TestContext *tc, Test *t)
     return fd;
 }
 
-void check_return_code(TestContext *tc, Test *test, int status)
+int check_return_code(TestContext *tc, Test *test, int status)
 {
     char filename[strlen(tc->dir) + strlen(test->name) + 5];
     sprintf(filename, "%s/%s.ret", tc->dir, test->name);
     FILE *fh = fopen(filename, "r");
     if (fh == NULL) {
-        return;
+        perror("fopen");
+        exit(EXIT_FAILURE);
     }
     int expected, actual;
     fscanf(fh, " %d", &expected);
@@ -183,15 +190,17 @@ void check_return_code(TestContext *tc, Test *test, int status)
     actual = WEXITSTATUS(status);
     if (expected == actual) {
         printf(".");
+        return 0;
     } else {
         printf("F");
         dprintf(tc->logfd[PIPE_WRITE],
                 "Test %s failed:\nexpected exit code %d, got %d\n\n",
                 test->name, expected, actual);
+        return 1;
     }
 }
 
-void check_output_file(TestContext *tc, Test *t,
+int check_output_file(TestContext *tc, Test *t,
         const char *fname, const char *ext)
 {
     char expected[256];
@@ -217,30 +226,36 @@ void check_output_file(TestContext *tc, Test *t,
     }
     if (WEXITSTATUS(status) == 0) {
         printf(".");
+        return 0;
     } else {
         printf("F");
         dprintf(tc->logfd[PIPE_WRITE],
                 "Test %s failed:\nstd%s differ\n\n",
                 t->name, ext);
+        return 1;
     }
 }
 
 void analyze_test_run(TestContext *tc, Test *test,
         const char *out_file, const char *err_file, int status)
 {
+    tc->test_num++;
     if (!WIFEXITED(status)) {
         printf("Program crashed\n");
         return;
     }
 
     if ((test->parts & TEST_RETVAL) == TEST_RETVAL) {
-        check_return_code(tc, test, status);
+        tc->check_num++;
+        tc->check_failed += check_return_code(tc, test, status);
     }
     if ((test->parts & TEST_OUTPUT) == TEST_OUTPUT) {
-        check_output_file(tc, test, out_file, "out");
+        tc->check_num++;
+        tc->check_failed += check_output_file(tc, test, out_file, "out");
     }
     if ((test->parts & TEST_ERRORS) == TEST_ERRORS) {
-        check_output_file(tc, test, err_file, "err");
+        tc->check_num++;
+        tc->check_failed += check_output_file(tc, test, err_file, "err");
     }
     unlink(out_file);
     unlink(err_file);
@@ -290,7 +305,8 @@ void run_test(Test *t, TestContext *tc)
 void test_context_run_tests(TestContext *tc, List *tests)
 {
     list_foreach(tests, CBFUNC(run_test), tc);
-    putchar('\n');
+    printf("\n\nRun %u tests, %u checks, %u failed\n",
+            tc->test_num, tc->check_num, tc->check_failed);
     close(tc->logfd[PIPE_WRITE]);
 }
 
