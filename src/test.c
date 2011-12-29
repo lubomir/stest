@@ -31,6 +31,7 @@ struct test_context_t {
     unsigned int test_num;
     unsigned int check_num;
     unsigned int check_failed;
+    VerbosityMode verbose;
 };
 
 enum {
@@ -153,6 +154,7 @@ TestContext * test_context_new(const char *cmd, const char *dir)
     tc->test_num = 0;
     tc->check_num = 0;
     tc->check_failed = 0;
+    tc->verbose = MODE_QUIET;
     tc->dir = strdup(dir);
     if (pipe(tc->logfd) < 0) {
         perror("pipe");
@@ -225,8 +227,15 @@ int check_output_file(TestContext *tc, Test *t,
         const char *fname, const char *ext)
 {
     char expected[256];
+    char buffer[1024];
+    ssize_t len;
     pid_t child;
-    int status;
+    int status, res;
+    int mypipe[2];
+    if (pipe(mypipe) < 0) {
+        perror("pipe");
+        exit(EXIT_FAILURE);
+    }
 
     sprintf(expected, "%s/%s.%s", tc->dir, t->name, ext);
 
@@ -236,17 +245,34 @@ int check_output_file(TestContext *tc, Test *t,
         exit(EXIT_FAILURE);
     } else if (child == 0) {    /* child */
         /* ... */
-        execlp("diff", "diff", "-u", expected, fname, NULL);
+        close(mypipe[PIPE_READ]);
+        dup2(mypipe[PIPE_WRITE], STDOUT_FILENO);
+        execlp("diff",
+                "diff", "-u", "-d", "--label=expected", "--label=actual",
+                expected, fname, NULL);
         perror("exec");
         exit(EXIT_FAILURE);
     }
+    close(mypipe[PIPE_WRITE]);
     wait(&status);
     if (WIFSIGNALED(status)) {
         fprintf(stderr, "Diff failed\n");
         exit(EXIT_FAILURE);
     }
-    return handle_result(tc, t, WEXITSTATUS(status) == 0,
-            "std%s differ\n\n", ext);
+
+    res = handle_result(tc, t, WEXITSTATUS(status) == 0,
+            "std%s differs", ext);
+    if (res != 0 && tc->verbose) {
+        dprintf(tc->logfd[PIPE_WRITE], " - diff follows:\n");
+        while ((len = read(mypipe[PIPE_READ], buffer, 1024)) > 0) {
+            write(tc->logfd[PIPE_WRITE], buffer, len);
+        }
+    }
+    if (res != 0 && !tc->verbose) {
+        dprintf(tc->logfd[PIPE_WRITE], "\n\n");
+    }
+    close(mypipe[PIPE_READ]);
+    return res;
 }
 
 void analyze_test_run(TestContext *tc, Test *test,
@@ -316,10 +342,12 @@ void run_test(Test *t, TestContext *tc)
     analyze_test_run(tc, t, stdout_file, stderr_file, status);
 }
 
-void test_context_run_tests(TestContext *tc, List *tests)
+void test_context_run_tests(TestContext *tc, List *tests, VerbosityMode verbose)
 {
     char buffer[1024];
     ssize_t len;
+
+    tc->verbose = verbose;
 
     list_foreach(tests, CBFUNC(run_test), tc);
     close(tc->logfd[PIPE_WRITE]);

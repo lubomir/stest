@@ -21,6 +21,11 @@ enum TestPart {
     TEST_UNKNOWN
 };
 
+typedef enum {
+    MODE_QUIET,
+    MODE_VERBOSE
+} VerbosityMode;
+
 typedef struct test_t Test;
 struct test_t {
     char *name;
@@ -63,9 +68,10 @@ void test_context_free(TestContext *tc);
 /**
  * Run list of tests in given context.
  *
- * @param tc    context to run in
- * @param tests tests to be executed (list of Test objects)
+ * @param tc        context to run in
+ * @param tests     tests to be executed (list of Test objects)
+ * @param verbose   whether to print diffs (if any)
  */
-void test_context_run_tests(TestContext *tc, List *tests);
+void test_context_run_tests(TestContext *tc, List *tests, VerbosityMode verbose);
 
 #endif /* end of include guard: TEST_H */
