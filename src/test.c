@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <stdarg.h>
 
 #include "test.h"
 
@@ -174,6 +175,20 @@ int test_context_get_fd(TestContext *tc, Test *t)
     return fd;
 }
 
+int handle_result(TestContext *tc, Test *test, int cond, const char *fmt, ...)
+{
+    if (cond) {
+        putchar('.');
+        return 0;
+    }
+    va_list args;
+    va_start(args, fmt);
+    putchar('F');
+    dprintf(tc->logfd[PIPE_WRITE], "Test %s failed: ", test->name);
+    vdprintf(tc->logfd[PIPE_WRITE], fmt, args);
+    return 1;
+}
+
 int check_return_code(TestContext *tc, Test *test, int status)
 {
     char filename[strlen(tc->dir) + strlen(test->name) + 5];
@@ -188,16 +203,8 @@ int check_return_code(TestContext *tc, Test *test, int status)
     fclose(fh);
 
     actual = WEXITSTATUS(status);
-    if (expected == actual) {
-        printf(".");
-        return 0;
-    } else {
-        printf("F");
-        dprintf(tc->logfd[PIPE_WRITE],
-                "Test %s failed:\nexpected exit code %d, got %d\n\n",
-                test->name, expected, actual);
-        return 1;
-    }
+    return handle_result(tc, test, expected == actual,
+            "expected exit code %d, got %d\n\n", expected, actual);
 }
 
 int check_output_file(TestContext *tc, Test *t,
@@ -224,16 +231,8 @@ int check_output_file(TestContext *tc, Test *t,
         fprintf(stderr, "Diff failed\n");
         exit(EXIT_FAILURE);
     }
-    if (WEXITSTATUS(status) == 0) {
-        printf(".");
-        return 0;
-    } else {
-        printf("F");
-        dprintf(tc->logfd[PIPE_WRITE],
-                "Test %s failed:\nstd%s differ\n\n",
-                t->name, ext);
-        return 1;
-    }
+    return handle_result(tc, t, WEXITSTATUS(status) == 0,
+            "std%s differ\n\n", ext);
 }
 
 void analyze_test_run(TestContext *tc, Test *test,
