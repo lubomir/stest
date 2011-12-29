@@ -101,7 +101,7 @@ int test_context_get_fd(TestContext *tc, Test *t)
     if ((t->parts & TEST_INPUT) != TEST_INPUT) {
         fd = open("/dev/null", O_RDONLY);
     } else {
-        sprintf(input_file, "%s/%s.in", tc->dir, t->name);
+        sprintf(input_file, "%s/%s.%s", tc->dir, t->name, EXT_INPUT);
         fd = open(input_file, O_RDONLY);
     }
     if (fd < 0) {
@@ -129,7 +129,7 @@ int handle_result(TestContext *tc, Test *test, int cond, const char *fmt, ...)
 int check_return_code(TestContext *tc, Test *test, int status)
 {
     char filename[strlen(tc->dir) + strlen(test->name) + 5];
-    sprintf(filename, "%s/%s.ret", tc->dir, test->name);
+    sprintf(filename, "%s/%s.%s", tc->dir, test->name, EXT_RETVAL);
     FILE *fh = fopen(filename, "r");
     if (fh == NULL) {
         perror("fopen");
@@ -217,11 +217,11 @@ void analyze_test_run(TestContext *tc, Test *test,
     }
     if ((test->parts & TEST_OUTPUT) == TEST_OUTPUT) {
         tc->check_num++;
-        tc->check_failed += check_output_file(tc, test, out_file, "out");
+        tc->check_failed += check_output_file(tc, test, out_file, EXT_OUTPUT);
     }
     if ((test->parts & TEST_ERRORS) == TEST_ERRORS) {
         tc->check_num++;
-        tc->check_failed += check_output_file(tc, test, err_file, "err");
+        tc->check_failed += check_output_file(tc, test, err_file, EXT_ERRORS);
     }
     putchar(' ');
     unlink(out_file);

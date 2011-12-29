@@ -97,6 +97,15 @@ typedef enum {
 } TestPart;
 
 /**
+ * String representations of test parts.
+ */
+#define EXT_INPUT   "in"
+#define EXT_OUTPUT  "out"
+#define EXT_ARGS    "args"
+#define EXT_ERRORS  "err"
+#define EXT_RETVAL  "ret"
+
+/**
  * Find out which test part is stored in given file.
  *
  * @param filename  file for which the type is queried

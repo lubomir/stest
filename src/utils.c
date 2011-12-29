@@ -55,7 +55,8 @@ void print_color(const char *color, const char *str)
 
 TestPart get_test_part(const char *filename)
 {
-    static const char *extensions[] = { "in", "out", "args", "err", "ret", NULL };
+    static const char *extensions[] = { EXT_INPUT, EXT_OUTPUT,
+        EXT_ARGS, EXT_ERRORS, EXT_RETVAL, NULL };
     char *ext;
     int i;
 
