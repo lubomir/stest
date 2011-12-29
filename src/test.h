@@ -27,14 +27,6 @@ struct test_t {
     uint8_t parts;
 };
 
-typedef struct test_result_t TestResult;
-struct test_result_t {
-    char *output_diff;
-    char *errors_diff;
-    char *retval;
-};
-#define TEST_RESULT(x) ((TestResult *)(x))
-
 typedef struct test_context_t TestContext;
 
 /**
@@ -70,13 +62,11 @@ void test_context_free(TestContext *tc);
 
 /**
  * Run list of tests in given context.
- * Returns a list of test results.
  *
  * @param tc    context to run in
  * @param tests tests to be executed (list of Test objects)
- * @return list of TestResult objects
  */
-List * test_context_run_tests(TestContext *tc, List *tests);
+void test_context_run_tests(TestContext *tc, List *tests);
 
 /**
  * Print details of failed tests to specified stream.

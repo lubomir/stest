@@ -14,7 +14,6 @@ struct test_context_t {
     char *cmd;
     char *dir;
     int logfd[2];
-    List *results;
 };
 
 enum {
@@ -135,7 +134,6 @@ TestContext * test_context_new(const char *cmd, const char *dir)
     TestContext *tc = malloc(sizeof(TestContext));
     tc->cmd = strdup(cmd);
     tc->dir = strdup(dir);
-    tc->results = NULL;
     if (pipe(tc->logfd) < 0) {
         perror("pipe");
         exit(EXIT_FAILURE);
@@ -148,7 +146,6 @@ void test_context_free(TestContext *tc)
     if (tc) {
         free(tc->cmd);
         free(tc->dir);
-        list_destroy(tc->results, DESTROYFUNC(test_free));
         close(tc->logfd[PIPE_READ]);
     }
     free(tc);
@@ -201,10 +198,6 @@ void analyze_test_run(TestContext *tc, Test *test,
         printf("Program crashed\n");
         return;
     }
-    TestResult *tr = malloc(sizeof(TestResult));
-    memset(tr, 0, sizeof(TestResult));
-
-    tc->results = list_prepend(tc->results, tr);
 
     if ((test->parts & TEST_RETVAL) == TEST_RETVAL) {
         check_return_code(tc, test, status);
@@ -254,13 +247,11 @@ void run_test(Test *t, TestContext *tc)
     analyze_test_run(tc, t, stdout_file, stderr_file, status);
 }
 
-List * test_context_run_tests(TestContext *tc, List *tests)
+void test_context_run_tests(TestContext *tc, List *tests)
 {
     list_foreach(tests, CBFUNC(run_test), tc);
-    tc->results = list_reverse(tc->results);
     putchar('\n');
     close(tc->logfd[PIPE_WRITE]);
-    return tc->results;
 }
 
 void test_context_flush_messages(TestContext *tc, FILE *fh)
