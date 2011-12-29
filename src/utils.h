@@ -123,4 +123,15 @@ TestPart get_test_part(const char *filename);
  */
 char * get_filepath(const char *dir, const char *fname, const char *ext);
 
+/**
+ * Copy all contents from one file descriptor to another. If lines is a pointer
+ * to a variable, also count how many lines were copied. Parameter dest may be
+ * set to -1, which would suppress writing.
+ *
+ * @param source    source file descriptor
+ * @param dest      destination file descriptor
+ * @param lines     number of lines copied
+ */
+void copy_data(int source, int dest, unsigned int *lines);
+
 #endif /* end of include guard: UTILS_H */

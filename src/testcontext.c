@@ -147,8 +147,6 @@ test_context_check_output_file(TestContext *tc,
                                const char *ext)
 {
     char *expected;
-    char buffer[1024];
-    ssize_t len;
     pid_t child;
     int status, res;
     int mypipe[2];
@@ -188,13 +186,9 @@ test_context_check_output_file(TestContext *tc,
         if (tc->verbose) {
             dprintf(tc->logfd[PIPE_WRITE], " - diff follows:\n");
         }
-        while ((len = read(mypipe[PIPE_READ], buffer, 1024)) > 0) {
-            if (tc->verbose) {  /* copy diff to log */
-                write(tc->logfd[PIPE_WRITE], buffer, len);
-            } else {            /* count number of lines */
-                line_num += count_lines(buffer, len);
-            }
-        }
+        copy_data(mypipe[PIPE_READ],
+                  tc->verbose ? tc->logfd[PIPE_WRITE] : -1,
+                  &line_num);
         if (!tc->verbose) {
             dprintf(tc->logfd[PIPE_WRITE], " - diff has %u lines\n",
                     line_num - 2);
@@ -294,18 +288,13 @@ static void test_context_run_test(Test *t, TestContext *tc)
 
 void test_context_run_tests(TestContext *tc, List *tests, VerbosityMode verbose)
 {
-    char buffer[1024];
-    ssize_t len;
-
     tc->verbose = verbose;
 
     list_foreach(tests, CBFUNC(test_context_run_test), tc);
     close(tc->logfd[PIPE_WRITE]);
     printf("\n\n");
 
-    while ((len = read(tc->logfd[PIPE_READ], buffer, 1024)) > 0) {
-        fwrite(buffer, sizeof(char), len, stdout);
-    }
+    copy_data(tc->logfd[PIPE_READ], STDOUT_FILENO, NULL);
 
     printf("\nRun %u tests, %u checks, %u failed\n",
             tc->test_num, tc->check_num, tc->check_failed);
