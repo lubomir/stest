@@ -113,5 +113,14 @@ typedef enum {
  */
 TestPart get_test_part(const char *filename);
 
+/**
+ * Build a filename. Caller must free the memory once it is not needed anymore.
+ *
+ * @param dir   directory with files
+ * @param fname file basename
+ * @param ext   extension
+ * @return zero-terminated string with path
+ */
+char * get_filepath(const char *dir, const char *fname, const char *ext);
 
 #endif /* end of include guard: UTILS_H */

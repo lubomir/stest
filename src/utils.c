@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "utils.h"
@@ -71,4 +72,17 @@ TestPart get_test_part(const char *filename)
     }
 
     return TEST_UNKNOWN;
+}
+
+char * get_filepath(const char *dir, const char *fname, const char *ext)
+{
+    char *path;
+
+    return_val_if_fail(dir != NULL, NULL);
+    return_val_if_fail(fname != NULL, NULL);
+    return_val_if_fail(ext != NULL, NULL);
+
+    path = calloc(strlen(dir) + strlen(fname) + strlen(ext) + 3, sizeof(char));
+    sprintf(path, "%s/%s.%s", dir, fname, ext);
+    return path;
 }

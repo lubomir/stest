@@ -66,3 +66,24 @@ test_get_test_part()
         cut_assert_equal_uint(TEST_UNKNOWN, get_test_part(bad_ones[i]));
     }
 }
+
+void
+test_get_filepath_ok()
+{
+    char *path;
+    path = get_filepath("dir", "file", "txt");
+    cut_assert_equal_string("dir/file.txt", path);
+    free(path);
+
+    path = get_filepath(".", "file", "in");
+    cut_assert_equal_string("./file.in", path);
+    free(path);
+}
+
+void
+test_get_filepath_failure()
+{
+    cut_assert_null(get_filepath(NULL, "file", "txt"));
+    cut_assert_null(get_filepath("dir", NULL, "txt"));
+    cut_assert_null(get_filepath("dir", "file", NULL));
+}
