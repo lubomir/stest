@@ -33,6 +33,7 @@ struct test_result_t {
     char *errors_diff;
     char *retval;
 };
+#define TEST_RESULT(x) ((TestResult *)(x))
 
 typedef struct test_context_t TestContext;
 
@@ -76,5 +77,13 @@ void test_context_free(TestContext *tc);
  * @return list of TestResult objects
  */
 List * test_context_run_tests(TestContext *tc, List *tests);
+
+/**
+ * Print details of failed tests to specified stream.
+ *
+ * @param tc    test context
+ * @param fh    handle of stream to print to
+ */
+void test_context_flush_messages(TestContext *tc, FILE *fh);
 
 #endif /* end of include guard: TEST_H */

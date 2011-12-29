@@ -4,6 +4,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <sys/wait.h>
 
 #include "test.h"
 
@@ -12,7 +13,13 @@
 struct test_context_t {
     char *cmd;
     char *dir;
+    int logfd[2];
     List *results;
+};
+
+enum {
+    PIPE_READ,
+    PIPE_WRITE
 };
 
 /**
@@ -129,6 +136,10 @@ TestContext * test_context_new(const char *cmd, const char *dir)
     tc->cmd = strdup(cmd);
     tc->dir = strdup(dir);
     tc->results = NULL;
+    if (pipe(tc->logfd) < 0) {
+        perror("pipe");
+        exit(EXIT_FAILURE);
+    }
     return tc;
 }
 
@@ -138,6 +149,7 @@ void test_context_free(TestContext *tc)
         free(tc->cmd);
         free(tc->dir);
         list_destroy(tc->results, DESTROYFUNC(test_free));
+        close(tc->logfd[PIPE_READ]);
     }
     free(tc);
 }
@@ -159,16 +171,50 @@ int test_context_get_fd(TestContext *tc, Test *t)
     return fd;
 }
 
+void check_return_code(TestContext *tc, Test *test, int status)
+{
+    char filename[strlen(tc->dir) + strlen(test->name) + 5];
+    sprintf(filename, "%s/%s.ret", tc->dir, test->name);
+    FILE *fh = fopen(filename, "r");
+    if (fh == NULL) {
+        return;
+    }
+    int expected, actual;
+    fscanf(fh, " %d", &expected);
+    fclose(fh);
+
+    actual = WEXITSTATUS(status);
+    if (expected == actual) {
+        printf(".");
+    } else {
+        printf("F");
+        dprintf(tc->logfd[PIPE_WRITE],
+                "Test %s failed:\nexpected exit code %d, got %d\n\n",
+                test->name, expected, actual);
+    }
+}
+
 void analyze_test_run(TestContext *tc, Test *test,
         const char *out_file, const char *err_file, int status)
 {
+    if (!WIFEXITED(status)) {
+        printf("Program crashed\n");
+        return;
+    }
+    TestResult *tr = malloc(sizeof(TestResult));
+    memset(tr, 0, sizeof(TestResult));
+
+    tc->results = list_prepend(tc->results, tr);
+
+    if ((test->parts & TEST_RETVAL) == TEST_RETVAL) {
+        check_return_code(tc, test, status);
+    }
     unlink(out_file);
     unlink(err_file);
 }
 
 void run_test(Test *t, TestContext *tc)
 {
-    printf("Running test %s\n", t->name);
     int stdin_fd, stdout_fd, stderr_fd;
     stdin_fd = test_context_get_fd(tc, t);
     char stdout_file[] = "/tmp/stest-stdout-XXXXXX";
@@ -212,5 +258,16 @@ List * test_context_run_tests(TestContext *tc, List *tests)
 {
     list_foreach(tests, CBFUNC(run_test), tc);
     tc->results = list_reverse(tc->results);
+    putchar('\n');
+    close(tc->logfd[PIPE_WRITE]);
     return tc->results;
+}
+
+void test_context_flush_messages(TestContext *tc, FILE *fh)
+{
+    char buffer[1024];
+    ssize_t len;
+    while ((len = read(tc->logfd[PIPE_READ], buffer, 1024)) > 0) {
+        fwrite(buffer, sizeof(char), len, fh);
+    }
 }
