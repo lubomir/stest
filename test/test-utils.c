@@ -43,20 +43,28 @@ test_filter_tests()
 }
 
 void
-test_get_test_part()
+test_get_test_part_ok()
 {
     cut_assert_equal_uint(TEST_INPUT, get_test_part("001_file.in"));
     cut_assert_equal_uint(TEST_OUTPUT, get_test_part("001_file.out"));
     cut_assert_equal_uint(TEST_ERRORS, get_test_part("001_file.err"));
     cut_assert_equal_uint(TEST_ARGS, get_test_part("001_file.args"));
     cut_assert_equal_uint(TEST_RETVAL, get_test_part("001_file.ret"));
+}
 
+void
+test_get_test_part_multiple_exts()
+{
     cut_assert_equal_uint(TEST_INPUT, get_test_part("001_file.out.in"));
     cut_assert_equal_uint(TEST_OUTPUT, get_test_part("001_file.in.out"));
     cut_assert_equal_uint(TEST_ERRORS, get_test_part("001_file.ret.err"));
     cut_assert_equal_uint(TEST_ARGS, get_test_part("001_file.in.args"));
     cut_assert_equal_uint(TEST_RETVAL, get_test_part("001_file.out.ret"));
+}
 
+void
+test_get_test_part_bad()
+{
     cut_assert_equal_uint(TEST_UNKNOWN, get_test_part(NULL));
 
     static char *bad_ones[] = { "001_file.bad", "002_file.", "003_no_ext",
