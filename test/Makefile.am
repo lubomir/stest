@@ -10,4 +10,4 @@ INCLUDES = $(CUTTER_CFLAGS) -I$(top_srcdir)/src
 LIBS = $(CUTTER_LIBS) $(top_srcdir)/src/liblist.la
 LDFLAGS = -module -rpath $(libdir) -avoid-version -no-undefined
 
-test_list_la_SOURCES = test-list.c
+test_list_la_SOURCES = test-list.c $(top_srcdir)/src/list.c
