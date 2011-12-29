@@ -57,12 +57,13 @@ void test_context_free(TestContext *tc)
 static int test_context_get_stdin(TestContext *tc, Test *t)
 {
     int fd;
-    char input_file[strlen(tc->dir) + strlen(t->name) + 5];
+    char *input_file;
     if ((t->parts & TEST_INPUT) != TEST_INPUT) {
         fd = open("/dev/null", O_RDONLY);
     } else {
-        sprintf(input_file, "%s/%s.%s", tc->dir, t->name, EXT_INPUT);
+        input_file = get_filepath(tc->dir, t->name, EXT_INPUT);
         fd = open(input_file, O_RDONLY);
+        free(input_file);
     }
     if (fd < 0) {
         perror("open");
@@ -111,14 +112,17 @@ test_context_handle_result(TestContext *tc,
 static int
 test_context_check_return_code(TestContext *tc, Test *test, int status)
 {
-    char filename[strlen(tc->dir) + strlen(test->name) + 5];
-    sprintf(filename, "%s/%s.%s", tc->dir, test->name, EXT_RETVAL);
-    FILE *fh = fopen(filename, "r");
+    char *filename;
+    FILE *fh;
+    int expected, actual;
+
+    filename = get_filepath(tc->dir, test->name, EXT_RETVAL);
+    fh = fopen(filename, "r");
+    free(filename);
     if (fh == NULL) {
         perror("fopen");
         exit(EXIT_FAILURE);
     }
-    int expected, actual;
     fscanf(fh, " %d", &expected);
     fclose(fh);
 
@@ -142,19 +146,20 @@ test_context_check_output_file(TestContext *tc,
                                const char *fname,
                                const char *ext)
 {
-    char expected[256];
+    char *expected;
     char buffer[1024];
     ssize_t len;
     pid_t child;
     int status, res;
     int mypipe[2];
     unsigned int line_num = 0;
+
     if (pipe(mypipe) < 0) {
         perror("pipe");
         exit(EXIT_FAILURE);
     }
 
-    sprintf(expected, "%s/%s.%s", tc->dir, t->name, ext);
+    expected = get_filepath(tc->dir, t->name, ext);
 
     child = fork();
     if (child == -1) {
@@ -169,6 +174,7 @@ test_context_check_output_file(TestContext *tc,
         perror("exec");
         exit(EXIT_FAILURE);
     }
+    free(expected);
     close(mypipe[PIPE_WRITE]);
     wait(&status);
     if (WIFSIGNALED(status)) {
