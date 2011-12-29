@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <ctype.h>
+#include <unistd.h>
 
 #include "utils.h"
 
@@ -40,4 +41,13 @@ unsigned int count_lines(const char *buffer, int len)
     unsigned int num = 0;
     while ((len--) > 0) if (*(buffer++) == '\n') num++;
     return num;
+}
+
+void print_color(const char *color, const char *str)
+{
+    if (isatty(STDOUT_FILENO)) {
+        printf("%s%s%s", color, str, NORMAL);
+    } else {
+        printf("%s", str);
+    }
 }

@@ -71,10 +71,11 @@ enum {
 
 /**
  * Print string to stdout with specified color.
+ * If stdout is not a terminal, skip all escape sequences.
  *
  * @param color     what color to print
  * @param str       string to be printed
  */
-#define print_color(color, str) printf("%s%s%s", color, str, NORMAL)
+void print_color(const char *color, const char *str);
 
 #endif /* end of include guard: UTILS_H */
