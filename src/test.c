@@ -270,6 +270,7 @@ void analyze_test_run(TestContext *tc, Test *test,
         tc->check_num++;
         tc->check_failed += check_output_file(tc, test, err_file, "err");
     }
+    putchar(' ');
     unlink(out_file);
     unlink(err_file);
 }
