@@ -1,4 +1,5 @@
 #include <cutter.h>
+#include <unistd.h>
 #include <utils.h>
 
 #define call_count_lines(str) count_lines(str, strlen(str))
@@ -94,4 +95,69 @@ test_get_filepath_failure()
     cut_assert_null(get_filepath(NULL, "file", "txt"));
     cut_assert_null(get_filepath("dir", NULL, "txt"));
     cut_assert_null(get_filepath("dir", "file", NULL));
+}
+
+#define write_data_terminated(fd, str) write(fd, str, (strlen(str) + 1) * sizeof(char))
+#define write_data(fd, str) write(fd, str, strlen(str) * sizeof(char))
+void
+test_copy_data_simple()
+{
+    int from[2];
+    int to[2];
+    char buffer[1024];
+    pipe(from);
+    pipe(to);
+
+    write_data_terminated(from[PIPE_WRITE], "foo bar baz");
+    close(from[PIPE_WRITE]);
+
+    copy_data(from[PIPE_READ], to[PIPE_WRITE], NULL);
+    close(to[PIPE_WRITE]);
+    close(from[PIPE_READ]);
+
+    read(to[PIPE_READ], buffer, 1024 * sizeof(char));
+    cut_assert_equal_string("foo bar baz", buffer);
+    close(to[PIPE_READ]);
+}
+
+void
+test_copy_data_more_lines()
+{
+    int from[2];
+    int to[2];
+    char buffer[1024];
+    unsigned int lines;
+
+    pipe(from);
+    pipe(to);
+
+    write_data(from[PIPE_WRITE], "foo\n");
+    write_data(from[PIPE_WRITE], "bar\n");
+    write_data_terminated(from[PIPE_WRITE], "baz\n");
+    close(from[PIPE_WRITE]);
+
+    copy_data(from[PIPE_READ], to[PIPE_WRITE], &lines);
+    close(to[PIPE_WRITE]);
+    close(from[PIPE_READ]);
+
+    read(to[PIPE_READ], buffer, 1024 * sizeof(char));
+    cut_assert_equal_string("foo\nbar\nbaz\n", buffer);
+    cut_assert_equal_uint(3, lines);
+    close(to[PIPE_READ]);
+}
+
+void
+test_copy_data_lines()
+{
+    int from[2];
+    unsigned int lines;
+    pipe(from);
+
+    write_data(from[PIPE_WRITE], "foo\nbar\nbaz\n");
+    close(from[PIPE_WRITE]);
+
+    copy_data(from[PIPE_READ], -1, &lines);
+    close(from[PIPE_READ]);
+
+    cut_assert_equal_uint(3, lines);
 }
