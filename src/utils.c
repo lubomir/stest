@@ -91,6 +91,7 @@ void copy_data(int source, int dest, unsigned int *lines)
 {
     char buffer[1024];
     ssize_t len;
+    if (lines != NULL) *lines = 0;
 
     while ((len = read(source, buffer, 1024)) > 0) {
         if (dest >= 0)
