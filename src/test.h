@@ -12,14 +12,14 @@
 
 #include "list.h"
 
-enum TestPart {
+typedef enum {
     TEST_INPUT  = 2 << 0,
     TEST_OUTPUT = 2 << 1,
     TEST_ARGS   = 2 << 3,
     TEST_ERRORS = 2 << 4,
     TEST_RETVAL = 2 << 5,
     TEST_UNKNOWN
-};
+} TestPart;
 
 typedef enum {
     MODE_QUIET,

@@ -23,9 +23,9 @@ struct test_context_t {
 /**
  * Find out which test part is stored in given file.
  */
-enum TestPart get_test_part(const char *filename);
+TestPart get_test_part(const char *filename);
 
-enum TestPart get_test_part(const char *filename)
+TestPart get_test_part(const char *filename)
 {
     return_val_if_fail(filename != NULL, TEST_UNKNOWN);
     char *ext = strrchr(filename, '.');
@@ -54,7 +54,7 @@ List * test_load_from_dir(const char *dir)
     Test *test;
     char *dot;
     size_t len;
-    enum TestPart tp;
+    TestPart tp;
 
     files_num = scandir(dir, &entries, filter_tests_wrap, number_sort_wrap);
 
