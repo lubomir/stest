@@ -73,7 +73,7 @@ enum TestPart get_test_part(const char *filename)
         return TEST_OUTPUT;
     if (strcmp(ext, "args") == 0)
         return TEST_ARGS;
-    if (strcmp(ext, "errors") == 0)
+    if (strcmp(ext, "err") == 0)
         return TEST_ERRORS;
     if (strcmp(ext, "ret") == 0)
         return TEST_RETVAL;
