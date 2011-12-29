@@ -191,6 +191,40 @@ void check_return_code(TestContext *tc, Test *test, int status)
     }
 }
 
+void check_output_file(TestContext *tc, Test *t,
+        const char *fname, const char *ext)
+{
+    char expected[256];
+    pid_t child;
+    int status;
+
+    sprintf(expected, "%s/%s.%s", tc->dir, t->name, ext);
+
+    child = fork();
+    if (child == -1) {
+        perror("fork");
+        exit(EXIT_FAILURE);
+    } else if (child == 0) {    /* child */
+        /* ... */
+        execlp("diff", "diff", "-u", expected, fname, NULL);
+        perror("exec");
+        exit(EXIT_FAILURE);
+    }
+    wait(&status);
+    if (WIFSIGNALED(status)) {
+        fprintf(stderr, "Diff failed\n");
+        exit(EXIT_FAILURE);
+    }
+    if (WEXITSTATUS(status) == 0) {
+        printf(".");
+    } else {
+        printf("F");
+        dprintf(tc->logfd[PIPE_WRITE],
+                "Test %s failed:\nstd%s differ\n\n",
+                t->name, ext);
+    }
+}
+
 void analyze_test_run(TestContext *tc, Test *test,
         const char *out_file, const char *err_file, int status)
 {
@@ -201,6 +235,12 @@ void analyze_test_run(TestContext *tc, Test *test,
 
     if ((test->parts & TEST_RETVAL) == TEST_RETVAL) {
         check_return_code(tc, test, status);
+    }
+    if ((test->parts & TEST_OUTPUT) == TEST_OUTPUT) {
+        check_output_file(tc, test, out_file, "out");
+    }
+    if ((test->parts & TEST_ERRORS) == TEST_ERRORS) {
+        check_output_file(tc, test, err_file, "err");
     }
     unlink(out_file);
     unlink(err_file);
