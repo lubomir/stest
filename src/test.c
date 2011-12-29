@@ -11,6 +11,18 @@
 
 #define return_val_if_fail(x,v) do { if (!(x)) return v; } while (0)
 
+#define RED     "\033[1;31m"
+#define GREEN   "\033[1;32m"
+#define NORMAL  "\033[0m"
+
+/**
+ * Print string to stdout with specified color.
+ *
+ * @param color     what color to print
+ * @param str       string to be printed
+ */
+#define print_color(color, str) printf("%s%s%s", color, str, NORMAL)
+
 struct test_context_t {
     char *cmd;
     char *dir;
@@ -178,12 +190,12 @@ int test_context_get_fd(TestContext *tc, Test *t)
 int handle_result(TestContext *tc, Test *test, int cond, const char *fmt, ...)
 {
     if (cond) {
-        putchar('.');
+        print_color(GREEN, ".");
         return 0;
     }
     va_list args;
     va_start(args, fmt);
-    putchar('F');
+    print_color(RED, "F");
     dprintf(tc->logfd[PIPE_WRITE], "Test %s failed: ", test->name);
     vdprintf(tc->logfd[PIPE_WRITE], fmt, args);
     return 1;
