@@ -41,3 +41,28 @@ test_filter_tests()
     cut_assert_equal_int(1, filter_tests("0-almost_bad_file1"));
     cut_assert_equal_int(10, filter_tests("1234567890_file1"));
 }
+
+void
+test_get_test_part()
+{
+    cut_assert_equal_uint(TEST_INPUT, get_test_part("001_file.in"));
+    cut_assert_equal_uint(TEST_OUTPUT, get_test_part("001_file.out"));
+    cut_assert_equal_uint(TEST_ERRORS, get_test_part("001_file.err"));
+    cut_assert_equal_uint(TEST_ARGS, get_test_part("001_file.args"));
+    cut_assert_equal_uint(TEST_RETVAL, get_test_part("001_file.ret"));
+
+    cut_assert_equal_uint(TEST_INPUT, get_test_part("001_file.out.in"));
+    cut_assert_equal_uint(TEST_OUTPUT, get_test_part("001_file.in.out"));
+    cut_assert_equal_uint(TEST_ERRORS, get_test_part("001_file.ret.err"));
+    cut_assert_equal_uint(TEST_ARGS, get_test_part("001_file.in.args"));
+    cut_assert_equal_uint(TEST_RETVAL, get_test_part("001_file.out.ret"));
+
+    cut_assert_equal_uint(TEST_UNKNOWN, get_test_part(NULL));
+
+    static char *bad_ones[] = { "001_file.bad", "002_file.", "003_no_ext",
+        "", NULL};
+
+    for (int i = 0; bad_ones[i] != NULL; i++) {
+        cut_assert_equal_uint(TEST_UNKNOWN, get_test_part(bad_ones[i]));
+    }
+}
