@@ -8,21 +8,7 @@
 #include <stdarg.h>
 
 #include "test.h"
-
-#define return_val_if_fail(x,v) do { if (!(x)) return v; } while (0)
-
-#define RED     "\033[1;31m"
-#define GREEN   "\033[1;32m"
-#define BOLD    "\033[1m"
-#define NORMAL  "\033[0m"
-
-/**
- * Print string to stdout with specified color.
- *
- * @param color     what color to print
- * @param str       string to be printed
- */
-#define print_color(color, str) printf("%s%s%s", color, str, NORMAL)
+#include "utils.h"
 
 struct test_context_t {
     char *cmd;
@@ -34,49 +20,10 @@ struct test_context_t {
     VerbosityMode verbose;
 };
 
-enum {
-    PIPE_READ,
-    PIPE_WRITE
-};
-
-/**
- * Compare two filenames based on leading digits.
- */
-int number_sort(const struct dirent **entry1, const struct dirent **entry2);
-
-/**
- * Test whether particular filename is a test definition - that is, whether
- * it starts with at least one digit.
- */
-int filter_tests(const struct dirent *entry);
-
 /**
  * Find out which test part is stored in given file.
  */
 enum TestPart get_test_part(const char *filename);
-
-int number_sort(const struct dirent **entry1, const struct dirent **entry2)
-{
-    unsigned int num1, num2;
-
-    sscanf((*entry1)->d_name, "%u", &num1);
-    sscanf((*entry2)->d_name, "%u", &num2);
-
-    return num1 - num2;
-}
-
-int filter_tests(const struct dirent *entry)
-{
-    int digits = 0;
-    const char *name = entry->d_name;
-
-    while (*name && isdigit(*name)) {
-        digits++;
-        name++;
-    }
-
-    return digits > 0;
-}
 
 enum TestPart get_test_part(const char *filename)
 {
@@ -221,20 +168,6 @@ int check_return_code(TestContext *tc, Test *test, int status)
     actual = WEXITSTATUS(status);
     return handle_result(tc, test, expected == actual,
             "expected exit code %d, got %d\n\n", expected, actual);
-}
-
-/**
- * Count number of lines in given string.
- *
- * @param buffer    string in a buffer
- * @param len       length of the buffer
- * @return number of ends of line
- */
-unsigned int count_lines(const char *buffer, int len)
-{
-    unsigned int num = 0;
-    while ((len--) > 0) if (*(buffer++) == '\n') num++;
-    return num;
 }
 
 int check_output_file(TestContext *tc, Test *t,
