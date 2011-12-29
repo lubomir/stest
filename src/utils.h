@@ -8,13 +8,27 @@
 /**
  * Compare two filenames based on leading digits.
  */
-int number_sort(const struct dirent **entry1, const struct dirent **entry2);
+int number_sort(const char *name1, const char *name2);
+
+/**
+ * Wrapper around number_sort() that extracts filenames from pointers to
+ * pointers to dirent structure.
+ */
+int number_sort_wrap(const struct dirent **entry1, const struct dirent **entry2);
 
 /**
  * Test whether particular filename is a test definition - that is, whether
  * it starts with at least one digit.
+ *
+ * @param name  filename to be checked
+ * @return number of digits at the start
  */
-int filter_tests(const struct dirent *entry);
+int filter_tests(const char *name);
+
+/**
+ * Wrapper around filter_tests that takes pointer to dirent structure.
+ */
+int filter_tests_wrap(const struct dirent *entry);
 
 /**
  * Count number of lines in given string.

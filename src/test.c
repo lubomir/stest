@@ -56,7 +56,7 @@ List * test_load_from_dir(const char *dir)
     size_t len;
     enum TestPart tp;
 
-    files_num = scandir(dir, &entries, filter_tests, number_sort);
+    files_num = scandir(dir, &entries, filter_tests_wrap, number_sort_wrap);
 
     for (i = 0; i < files_num;) {
         test = malloc(sizeof(Test));
