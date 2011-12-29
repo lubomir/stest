@@ -45,7 +45,16 @@ void test_context_free(TestContext *tc)
     free(tc);
 }
 
-int test_context_get_fd(TestContext *tc, Test *t)
+/**
+ * Open file descriptor with input for given test. If test does not specify
+ * any input, /dev/null is opened and passed. It is responsibility of caller
+ * to close this descriptor.
+ *
+ * @param tc    test context
+ * @param t     test
+ * @return file descriptor with new standard input
+ */
+static int test_context_get_stdin(TestContext *tc, Test *t)
 {
     int fd;
     char input_file[strlen(tc->dir) + strlen(t->name) + 5];
@@ -62,7 +71,21 @@ int test_context_get_fd(TestContext *tc, Test *t)
     return fd;
 }
 
-int handle_result(TestContext *tc, Test *test, int cond, const char *fmt, ...)
+/**
+ * Check if condition holds and print appropriate message to stdout.
+ *
+ * @param tc    test context
+ * @param t     test run
+ * @param cond  condition to check
+ * @param fmt   printf-style formatting string with error message
+ * @return 0 if test passed, 1 otherwise
+ */
+static int
+test_context_handle_result(TestContext *tc,
+                           Test *test,
+                           int cond,
+                           const char *fmt,
+                           ...)
 {
     if (cond) {
         print_color(GREEN, ".");
@@ -77,7 +100,16 @@ int handle_result(TestContext *tc, Test *test, int cond, const char *fmt, ...)
     return 1;
 }
 
-int check_return_code(TestContext *tc, Test *test, int status)
+/**
+ * Check if exit status of the program tested matches the expected one.
+ *
+ * @param tc    test context
+ * @param t     test run
+ * @param status    status returned by wait()
+ * @return 0 if test passed, 1 otherwise
+ */
+static int
+test_context_check_return_code(TestContext *tc, Test *test, int status)
 {
     char filename[strlen(tc->dir) + strlen(test->name) + 5];
     sprintf(filename, "%s/%s.%s", tc->dir, test->name, EXT_RETVAL);
@@ -91,12 +123,24 @@ int check_return_code(TestContext *tc, Test *test, int status)
     fclose(fh);
 
     actual = WEXITSTATUS(status);
-    return handle_result(tc, test, expected == actual,
+    return test_context_handle_result(tc, test, expected == actual,
             "expected exit code %d, got %d\n\n", expected, actual);
 }
 
-int check_output_file(TestContext *tc, Test *t,
-        const char *fname, const char *ext)
+/**
+ * Check if given output matches the expected one.
+ *
+ * @param tc    test context
+ * @param t     test run
+ * @param fname file with actual output of the program
+ * @param ext   extension specifying type of check to perform
+ * @return 0 if test passed, 1 otherwise
+ */
+static int
+test_context_check_output_file(TestContext *tc,
+                               Test *t,
+                               const char *fname,
+                               const char *ext)
 {
     char expected[256];
     char buffer[1024];
@@ -132,7 +176,8 @@ int check_output_file(TestContext *tc, Test *t,
         exit(EXIT_FAILURE);
     }
 
-    res = handle_result(tc, t, WEXITSTATUS(status) == 0, "std%s differs", ext);
+    res = test_context_handle_result(tc, t,
+            WEXITSTATUS(status) == 0, "std%s differs", ext);
     if (res != 0) {             /* checking failed */
         if (tc->verbose) {
             dprintf(tc->logfd[PIPE_WRITE], " - diff follows:\n");
@@ -153,8 +198,21 @@ int check_output_file(TestContext *tc, Test *t,
     return res;
 }
 
-void analyze_test_run(TestContext *tc, Test *test,
-        const char *out_file, const char *err_file, int status)
+/**
+ * Check outputs of a program and update counters accordingly.
+ *
+ * @param tc    test context
+ * @param test  test run
+ * @param out_file  where stdout was stored
+ * @param err_file  where stderr was stored
+ * @param status    status received from wait()
+ */
+static void
+test_context_analyze_test_run(TestContext *tc,
+                              Test *test,
+                              const char *out_file,
+                              const char *err_file,
+                              int status)
 {
     tc->test_num++;
     if (!WIFEXITED(status)) {
@@ -164,25 +222,33 @@ void analyze_test_run(TestContext *tc, Test *test,
 
     if ((test->parts & TEST_RETVAL) == TEST_RETVAL) {
         tc->check_num++;
-        tc->check_failed += check_return_code(tc, test, status);
+        tc->check_failed += test_context_check_return_code(tc, test, status);
     }
     if ((test->parts & TEST_OUTPUT) == TEST_OUTPUT) {
         tc->check_num++;
-        tc->check_failed += check_output_file(tc, test, out_file, EXT_OUTPUT);
+        tc->check_failed += test_context_check_output_file(tc, test,
+                out_file, EXT_OUTPUT);
     }
     if ((test->parts & TEST_ERRORS) == TEST_ERRORS) {
         tc->check_num++;
-        tc->check_failed += check_output_file(tc, test, err_file, EXT_ERRORS);
+        tc->check_failed += test_context_check_output_file(tc, test,
+                err_file, EXT_ERRORS);
     }
     putchar(' ');
     unlink(out_file);
     unlink(err_file);
 }
 
-void run_test(Test *t, TestContext *tc)
+/**
+ * Run a test in given context and analyze the results.
+ *
+ * @param t     test to be run
+ * @param tc    test context
+ */
+static void test_context_run_test(Test *t, TestContext *tc)
 {
     int stdin_fd, stdout_fd, stderr_fd;
-    stdin_fd = test_context_get_fd(tc, t);
+    stdin_fd = test_context_get_stdin(tc, t);
     char stdout_file[] = "/tmp/stest-stdout-XXXXXX";
     char stderr_file[] = "/tmp/stest-stderr-XXXXXX";
     stdout_fd = mkstemp(stdout_file);
@@ -217,7 +283,7 @@ void run_test(Test *t, TestContext *tc)
 
     wait(&status);
 
-    analyze_test_run(tc, t, stdout_file, stderr_file, status);
+    test_context_analyze_test_run(tc, t, stdout_file, stderr_file, status);
 }
 
 void test_context_run_tests(TestContext *tc, List *tests, VerbosityMode verbose)
@@ -227,7 +293,7 @@ void test_context_run_tests(TestContext *tc, List *tests, VerbosityMode verbose)
 
     tc->verbose = verbose;
 
-    list_foreach(tests, CBFUNC(run_test), tc);
+    list_foreach(tests, CBFUNC(test_context_run_test), tc);
     close(tc->logfd[PIPE_WRITE]);
     printf("\n\n");
 
