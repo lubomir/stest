@@ -78,4 +78,31 @@ enum {
  */
 void print_color(const char *color, const char *str);
 
+/**
+ * Each test has at least two parts.
+ */
+typedef enum {
+    /** Gets passed to stdin */
+    TEST_INPUT  = 2 << 0,
+    /** Is expected on stdout */
+    TEST_OUTPUT = 2 << 1,
+    /** Gets passed as command line arguments */
+    TEST_ARGS   = 2 << 2,
+    /** Is expected on stderr */
+    TEST_ERRORS = 2 << 3,
+    /** Expected exit value of the program */
+    TEST_RETVAL = 2 << 4,
+    /** Falback value for unknown test type */
+    TEST_UNKNOWN
+} TestPart;
+
+/**
+ * Find out which test part is stored in given file.
+ *
+ * @param filename  file for which the type is queried
+ * @return test type
+ */
+TestPart get_test_part(const char *filename);
+
+
 #endif /* end of include guard: UTILS_H */

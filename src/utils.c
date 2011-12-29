@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "utils.h"
 
@@ -50,4 +51,25 @@ void print_color(const char *color, const char *str)
     } else {
         printf("%s", str);
     }
+}
+
+TestPart get_test_part(const char *filename)
+{
+    return_val_if_fail(filename != NULL, TEST_UNKNOWN);
+    char *ext = strrchr(filename, '.');
+    return_val_if_fail(ext != NULL, TEST_UNKNOWN);
+    ext++;
+
+    if (strcmp(ext, "in") == 0)
+        return TEST_INPUT;
+    if (strcmp(ext, "out") == 0)
+        return TEST_OUTPUT;
+    if (strcmp(ext, "args") == 0)
+        return TEST_ARGS;
+    if (strcmp(ext, "err") == 0)
+        return TEST_ERRORS;
+    if (strcmp(ext, "ret") == 0)
+        return TEST_RETVAL;
+
+    return TEST_UNKNOWN;
 }

@@ -20,32 +20,6 @@ struct test_context_t {
     VerbosityMode verbose;
 };
 
-/**
- * Find out which test part is stored in given file.
- */
-TestPart get_test_part(const char *filename);
-
-TestPart get_test_part(const char *filename)
-{
-    return_val_if_fail(filename != NULL, TEST_UNKNOWN);
-    char *ext = strrchr(filename, '.');
-    return_val_if_fail(ext != NULL, TEST_UNKNOWN);
-    ext++;
-
-    if (strcmp(ext, "in") == 0)
-        return TEST_INPUT;
-    if (strcmp(ext, "out") == 0)
-        return TEST_OUTPUT;
-    if (strcmp(ext, "args") == 0)
-        return TEST_ARGS;
-    if (strcmp(ext, "err") == 0)
-        return TEST_ERRORS;
-    if (strcmp(ext, "ret") == 0)
-        return TEST_RETVAL;
-
-    return TEST_UNKNOWN;
-}
-
 List * test_load_from_dir(const char *dir)
 {
     struct dirent **entries;
