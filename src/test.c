@@ -13,6 +13,7 @@
 
 #define RED     "\033[1;31m"
 #define GREEN   "\033[1;32m"
+#define BOLD    "\033[1m"
 #define NORMAL  "\033[0m"
 
 /**
@@ -196,7 +197,8 @@ int handle_result(TestContext *tc, Test *test, int cond, const char *fmt, ...)
     va_list args;
     va_start(args, fmt);
     print_color(RED, "F");
-    dprintf(tc->logfd[PIPE_WRITE], "Test %s failed: ", test->name);
+    dprintf(tc->logfd[PIPE_WRITE], "Test %s%s%s failed:\n",
+            BOLD, test->name, NORMAL);
     vdprintf(tc->logfd[PIPE_WRITE], fmt, args);
     return 1;
 }
