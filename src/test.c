@@ -223,6 +223,20 @@ int check_return_code(TestContext *tc, Test *test, int status)
             "expected exit code %d, got %d\n\n", expected, actual);
 }
 
+/**
+ * Count number of lines in given string.
+ *
+ * @param buffer    string in a buffer
+ * @param len       length of the buffer
+ * @return number of ends of line
+ */
+unsigned int count_lines(const char *buffer, int len)
+{
+    unsigned int num = 0;
+    while ((len--) > 0) if (*(buffer++) == '\n') num++;
+    return num;
+}
+
 int check_output_file(TestContext *tc, Test *t,
         const char *fname, const char *ext)
 {
@@ -232,6 +246,7 @@ int check_output_file(TestContext *tc, Test *t,
     pid_t child;
     int status, res;
     int mypipe[2];
+    unsigned int line_num = 0;
     if (pipe(mypipe) < 0) {
         perror("pipe");
         exit(EXIT_FAILURE);
@@ -244,7 +259,6 @@ int check_output_file(TestContext *tc, Test *t,
         perror("fork");
         exit(EXIT_FAILURE);
     } else if (child == 0) {    /* child */
-        /* ... */
         close(mypipe[PIPE_READ]);
         dup2(mypipe[PIPE_WRITE], STDOUT_FILENO);
         execlp("diff",
@@ -260,16 +274,22 @@ int check_output_file(TestContext *tc, Test *t,
         exit(EXIT_FAILURE);
     }
 
-    res = handle_result(tc, t, WEXITSTATUS(status) == 0,
-            "std%s differs", ext);
-    if (res != 0 && tc->verbose) {
-        dprintf(tc->logfd[PIPE_WRITE], " - diff follows:\n");
-        while ((len = read(mypipe[PIPE_READ], buffer, 1024)) > 0) {
-            write(tc->logfd[PIPE_WRITE], buffer, len);
+    res = handle_result(tc, t, WEXITSTATUS(status) == 0, "std%s differs", ext);
+    if (res != 0) {             /* checking failed */
+        if (tc->verbose) {
+            dprintf(tc->logfd[PIPE_WRITE], " - diff follows:\n");
         }
-    }
-    if (res != 0 && !tc->verbose) {
-        dprintf(tc->logfd[PIPE_WRITE], "\n\n");
+        while ((len = read(mypipe[PIPE_READ], buffer, 1024)) > 0) {
+            if (tc->verbose) {  /* copy diff to log */
+                write(tc->logfd[PIPE_WRITE], buffer, len);
+            } else {            /* count number of lines */
+                line_num += count_lines(buffer, len);
+            }
+        }
+        if (!tc->verbose) {
+            dprintf(tc->logfd[PIPE_WRITE], " - diff has %u lines\n",
+                    line_num - 2);
+        }
     }
     close(mypipe[PIPE_READ]);
     return res;
