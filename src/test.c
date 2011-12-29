@@ -315,17 +315,17 @@ void run_test(Test *t, TestContext *tc)
 
 void test_context_run_tests(TestContext *tc, List *tests)
 {
-    list_foreach(tests, CBFUNC(run_test), tc);
-    printf("\n\nRun %u tests, %u checks, %u failed\n",
-            tc->test_num, tc->check_num, tc->check_failed);
-    close(tc->logfd[PIPE_WRITE]);
-}
-
-void test_context_flush_messages(TestContext *tc, FILE *fh)
-{
     char buffer[1024];
     ssize_t len;
+
+    list_foreach(tests, CBFUNC(run_test), tc);
+    close(tc->logfd[PIPE_WRITE]);
+    printf("\n\n");
+
     while ((len = read(tc->logfd[PIPE_READ], buffer, 1024)) > 0) {
-        fwrite(buffer, sizeof(char), len, fh);
+        fwrite(buffer, sizeof(char), len, stdout);
     }
+
+    printf("\nRun %u tests, %u checks, %u failed\n",
+            tc->test_num, tc->check_num, tc->check_failed);
 }

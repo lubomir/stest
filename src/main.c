@@ -28,7 +28,6 @@ int main(int argc, char *argv[])
 
     TestContext *tc = test_context_new(argv[1], "tests");
     test_context_run_tests(tc, tests);
-    test_context_flush_messages(tc, stdout);
     list_destroy(tests, DESTROYFUNC(test_free));
     test_context_free(tc);
 

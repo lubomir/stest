@@ -68,12 +68,4 @@ void test_context_free(TestContext *tc);
  */
 void test_context_run_tests(TestContext *tc, List *tests);
 
-/**
- * Print details of failed tests to specified stream.
- *
- * @param tc    test context
- * @param fh    handle of stream to print to
- */
-void test_context_flush_messages(TestContext *tc, FILE *fh);
-
 #endif /* end of include guard: TEST_H */
