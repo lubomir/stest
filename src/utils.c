@@ -55,21 +55,19 @@ void print_color(const char *color, const char *str)
 
 TestPart get_test_part(const char *filename)
 {
+    static const char *extensions[] = { "in", "out", "args", "err", "ret", NULL };
+    char *ext;
+    int i;
+
     return_val_if_fail(filename != NULL, TEST_UNKNOWN);
-    char *ext = strrchr(filename, '.');
+    ext = strrchr(filename, '.');
     return_val_if_fail(ext != NULL, TEST_UNKNOWN);
     ext++;
 
-    if (strcmp(ext, "in") == 0)
-        return TEST_INPUT;
-    if (strcmp(ext, "out") == 0)
-        return TEST_OUTPUT;
-    if (strcmp(ext, "args") == 0)
-        return TEST_ARGS;
-    if (strcmp(ext, "err") == 0)
-        return TEST_ERRORS;
-    if (strcmp(ext, "ret") == 0)
-        return TEST_RETVAL;
+    for (i = 0; extensions[i] != NULL; i++) {
+        if (strcmp(ext, extensions[i]) == 0)
+            return 2 << i;
+    }
 
     return TEST_UNKNOWN;
 }
