@@ -1,10 +1,11 @@
-#include "config.h"
+#include <config.h>
 
 #include <stdio.h>
 #include <sys/stat.h>
 
 #include "list.h"
 #include "test.h"
+#include "testcontext.h"
 
 int main(int argc, char *argv[])
 {
