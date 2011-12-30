@@ -259,6 +259,53 @@ test_context_prepare_outfiles(char *out_file,
 }
 
 /**
+ * Build argument vector to be passed to tested program. First element will be
+ * the executed command. This function always returns vector with at least one
+ * element.
+ *
+ * @param tc    test context
+ * @param t     test from which to retrieve arguments
+ * @return NULL terminated array of strings
+ */
+static char **
+test_context_get_args(TestContext *tc, Test *t)
+{
+    char **args = NULL;
+    char *line = NULL, *fname;
+    size_t len = 0, count;
+    FILE *fh;
+
+    if ((t->parts & TEST_ARGS) == TEST_ARGS) {
+        fname = get_filepath(tc->dir, t->name, EXT_ARGS);
+        fh = fopen(fname, "r");
+        if (fh == NULL) {
+            perror("Can not open args file");
+            exit(EXIT_FAILURE);
+        }
+        if (getline(&line, &len, fh) < 0) {
+            fprintf(stderr, "Can not read arguments from %s\n", fname);
+            exit(EXIT_FAILURE);
+        }
+        fclose(fh);
+        free(fname);
+        args = parse_args(line, &count);
+        if (args == NULL) {
+            fprintf(stderr, "Can not parse arguments for test %s\n", t->name);
+            exit(EXIT_FAILURE);
+        }
+
+        args = realloc(args, (count + 1) * sizeof(char *));
+        memmove(args+1, args, count * sizeof(char *));
+    } else {
+        args = calloc(2, sizeof(char **));
+        args[1] = NULL;
+    }
+    free(line);
+    args[0] = strdup(tc->cmd);
+    return args;
+}
+
+/**
  * Run a test in given context and analyze the results.
  *
  * @param t     test to be run
@@ -266,8 +313,7 @@ test_context_prepare_outfiles(char *out_file,
  */
 static void test_context_run_test(Test *t, TestContext *tc)
 {
-    int in_fd, out_fd, err_fd;
-    in_fd = test_context_get_stdin(tc, t);
+    int in_fd, out_fd, err_fd, i;
     char out_file[] = "/tmp/stest-stdout-XXXXXX";
     char err_file[] = "/tmp/stest-stderr-XXXXXX";
     pid_t child;
@@ -275,6 +321,9 @@ static void test_context_run_test(Test *t, TestContext *tc)
     char **args;
 
     test_context_prepare_outfiles(out_file, &out_fd, err_file, &err_fd);
+    in_fd = test_context_get_stdin(tc, t);
+    args = test_context_get_args(tc, t);
+
 
     child = fork();
     if (child == -1) {
@@ -284,7 +333,7 @@ static void test_context_run_test(Test *t, TestContext *tc)
         dup2(in_fd, STDIN_FILENO);
         dup2(out_fd, STDOUT_FILENO);
         dup2(err_fd, STDERR_FILENO);
-        execl(tc->cmd, tc->cmd, NULL);
+        execv(tc->cmd, args);
         perror("exec");
         exit(EXIT_FAILURE);
     }                           /* Parent */
@@ -293,6 +342,10 @@ static void test_context_run_test(Test *t, TestContext *tc)
     close(err_fd);
 
     wait(&status);
+
+    for (i = 0; args[i] != NULL; i++)
+        free(args[i]);
+    free(args);
 
     test_context_analyze_test_run(tc, t, out_file, err_file, status);
 }
