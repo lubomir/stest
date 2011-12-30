@@ -150,21 +150,20 @@ char ** parse_args(const char *str, size_t *len)
         }
         str++;
     }
-    if (string != NULL) {
+    if (string != NULL && *string != '\0') {
         list = list_prepend(list, string);
         idx++;
     }
 
-    if (idx == 0) goto out;
-
     array = calloc(idx + 1, sizeof(char *));
     if (len) *len = idx + 1;
-
-    idx--;
-    for (tmp = list; tmp != NULL; tmp = tmp->next) {
-        array[idx--] = tmp->data;
+    if (idx != 0) {
+        idx--;
+        for (tmp = list; tmp != NULL; tmp = tmp->next) {
+            array[idx--] = tmp->data;
+        }
+        list_destroy(list, NULL);
     }
-    list_destroy(list, NULL);
 
     return array;
 

@@ -237,11 +237,26 @@ test_parse_args_complicated()
 }
 
 void
+test_parse_args_empty()
+{
+    char *tests[] = { "", " ", "''", "\"\"", NULL };
+    char *expected[] = { NULL };
+    int i = 0;
+    size_t len;
+
+    while (tests[i] != NULL) {
+        cut_assert_equal_string_array_with_free(expected,
+                parse_args(tests[i], &len),
+                cut_message("Input: >%s<", tests[i]));
+        cut_assert_equal_uint(1, len, cut_message("Input: >%s<", tests[i]));
+        i++;
+    }
+}
+
+void
 test_parse_args_malformed()
 {
     char *tests[] = {
-        "",
-        "  ",
         "\"",
         "'",
         "\\",
