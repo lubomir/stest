@@ -5,6 +5,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include "outputqueue.h"
 #include "test.h"
 #include "testcontext.h"
 #include "utils.h"

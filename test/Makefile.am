@@ -1,4 +1,4 @@
-noinst_LTLIBRARIES = test_list.la test_utils.la
+noinst_LTLIBRARIES = test_list.la test_utils.la test_oqueue.la
 
 TESTS = run-test.sh
 TESTS_ENVIRONMENT = NO_MAKE="yes" CUTTER="$(CUTTER)"
@@ -11,4 +11,10 @@ LIBS = $(CUTTER_LIBS)
 LDFLAGS = -module -rpath $(libdir) -avoid-version -no-undefined
 
 test_list_la_SOURCES = test-list.c $(top_srcdir)/src/list.c
-test_utils_la_SOURCES = test-utils.c $(top_srcdir)/src/utils.c $(top_srcdir)/src/list.c
+test_utils_la_SOURCES = test-utils.c \
+			$(top_srcdir)/src/list.c \
+			$(top_srcdir)/src/utils.c
+test_oqueue_la_SOURCES = test-oqueue.c \
+			 $(top_srcdir)/src/list.c \
+			 $(top_srcdir)/src/utils.c \
+			 $(top_srcdir)/src/outputqueue.c
