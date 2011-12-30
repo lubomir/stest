@@ -108,7 +108,7 @@ void copy_data(int source, int dest, unsigned int *lines)
  */
 #define try_inc_string(s) do { s++; if (*s == '\0') goto out; } while (0)
 
-char ** parse_args(const char *str)
+char ** parse_args(const char *str, size_t *len)
 {
     char **array;
     List *list = NULL, *tmp;
@@ -158,6 +158,7 @@ char ** parse_args(const char *str)
     if (idx == 0) goto out;
 
     array = calloc(idx + 1, sizeof(char *));
+    if (len) *len = idx + 1;
 
     idx--;
     for (tmp = list; tmp != NULL; tmp = tmp->next) {
@@ -169,5 +170,6 @@ char ** parse_args(const char *str)
 
 out:
     if (list) list_destroy(list, DESTROYFUNC(free));
+    if (len) *len = 0;
     return NULL;
 }

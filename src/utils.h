@@ -150,9 +150,13 @@ void copy_data(int source, int dest, unsigned int *lines);
  * If string is invalid (e.g. unterminated quote), NULL is returned. Caller is
  * responsible for freeing the memory.
  *
+ * If second argument is not NULL, the size (in elements) of the returned
+ * array is stored there.
+ *
  * @param str   string to be parsed
+ * @param len   pointer size of the returned array
  * @return NULL-terminated array of strings or NULL on failure
  */
-char ** parse_args(const char *str);
+char ** parse_args(const char *str, size_t *len);
 
 #endif /* end of include guard: UTILS_H */

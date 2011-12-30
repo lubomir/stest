@@ -171,7 +171,7 @@ test_parse_args_single()
 
     while (tests[i] != NULL) {
         cut_assert_equal_string_array_with_free(expected,
-                parse_args(tests[i]),
+                parse_args(tests[i], NULL),
                 cut_message("Input: >%s<", tests[i]));
         i++;
     }
@@ -187,7 +187,7 @@ test_parse_args_double()
 
     while (tests[i] != NULL) {
         cut_assert_equal_string_array_with_free(expected,
-                parse_args(tests[i]),
+                parse_args(tests[i], NULL),
                 cut_message("Input: >%s<", tests[i]));
         i++;
     }
@@ -209,7 +209,7 @@ test_parse_args_escaped()
 
     while (tests[i] != NULL) {
         cut_assert_equal_string_array_with_free(expected,
-                parse_args(tests[i]),
+                parse_args(tests[i], NULL),
                 cut_message("Input: >%s<", tests[i]));
         i++;
     }
@@ -230,7 +230,7 @@ test_parse_args_complicated()
 
     while (tests[i] != NULL) {
         cut_assert_equal_string_array_with_free(expected,
-                parse_args(tests[i]),
+                parse_args(tests[i], NULL),
                 cut_message("Input: >%s<", tests[i]));
         i++;
     }
@@ -258,7 +258,7 @@ test_parse_args_malformed()
     int i = 0;
 
     while (tests[i] != NULL) {
-        cut_assert_null(parse_args(tests[i]),
+        cut_assert_null(parse_args(tests[i], NULL),
                 cut_message("Input: >%s<", tests[i]));
         i++;
     }
@@ -274,7 +274,8 @@ test_parse_args_many()
         NULL };
     cut_assert_equal_string_array_with_free(expected,
             parse_args("a b c d e f g h i j k l m n o p q r s t u v w x y z "
-                       "A B C D E F G H I J K L M N O P Q R S T U V W X Y Z"));
+                       "A B C D E F G H I J K L M N O P Q R S T U V W X Y Z",
+                       NULL));
 }
 
 void
@@ -284,5 +285,27 @@ test_parse_args_long()
         "1234567890987654321", NULL };
     cut_assert_equal_string_array_with_free(expected,
             parse_args("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ "
-                       " 1234567890987654321"));
+                       " 1234567890987654321", NULL));
+}
+
+void
+test_parse_args_len()
+{
+    char *expected1[] = { "foo", NULL };
+    char *expected2[] = { "foo", "bar", NULL };
+    char *expected3[] = { "foo", "bar", "baz", NULL };
+    char *expected4[] = { "foo bar", NULL };
+    char **expected[] = { expected1, expected2, expected3, expected4 };
+    char *tests[] = { "foo", "foo bar", "foo bar baz", "'foo bar'", NULL };
+    size_t lengths[] = { 2, 3, 4, 2 };
+    size_t len;
+    int i;
+
+    for (i = 0; tests[i] != NULL; i++) {
+        cut_assert_equal_string_array_with_free(expected[i],
+                parse_args(tests[i], &len),
+                cut_message("Input -%s-", tests[i]));
+        cut_assert_equal_uint(lengths[i], len,
+                cut_message("Input -%s-", tests[i]));
+    }
 }
