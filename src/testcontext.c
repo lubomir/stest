@@ -240,6 +240,25 @@ test_context_analyze_test_run(TestContext *tc,
 }
 
 /**
+ * Create temporary files for stdout and stderr, open them and then return
+ * their file descriptors. The (char *) arguments will be modified and
+ * therefore can not point to string constant.
+ */
+static void
+test_context_prepare_outfiles(char *out_file,
+                              int *out_fd,
+                              char *err_file,
+                              int *err_fd)
+{
+    *out_fd = mkstemp(out_file);
+    *err_fd = mkstemp(err_file);
+    if (*err_fd < 0 || *out_fd < 0) {
+        perror("Can not create temporary file");
+        exit(EXIT_FAILURE);
+    }
+}
+
+/**
  * Run a test in given context and analyze the results.
  *
  * @param t     test to be run
@@ -247,43 +266,35 @@ test_context_analyze_test_run(TestContext *tc,
  */
 static void test_context_run_test(Test *t, TestContext *tc)
 {
-    int stdin_fd, stdout_fd, stderr_fd;
-    stdin_fd = test_context_get_stdin(tc, t);
-    char stdout_file[] = "/tmp/stest-stdout-XXXXXX";
-    char stderr_file[] = "/tmp/stest-stderr-XXXXXX";
-    stdout_fd = mkstemp(stdout_file);
-    if (stdout_fd < 0) {
-        perror("mkstemp");
-        exit(EXIT_FAILURE);
-    }
-    stderr_fd = mkstemp(stderr_file);
-    if (stderr_fd < 0) {
-        perror("mkstemp");
-        exit(EXIT_FAILURE);
-    }
-
+    int in_fd, out_fd, err_fd;
+    in_fd = test_context_get_stdin(tc, t);
+    char out_file[] = "/tmp/stest-stdout-XXXXXX";
+    char err_file[] = "/tmp/stest-stderr-XXXXXX";
     pid_t child;
     int status;
+    char **args;
+
+    test_context_prepare_outfiles(out_file, &out_fd, err_file, &err_fd);
 
     child = fork();
     if (child == -1) {
         perror("fork");
         exit(EXIT_FAILURE);
     } else if (child == 0) {    /* Child */
-        dup2(stdin_fd, STDIN_FILENO);
-        dup2(stdout_fd, STDOUT_FILENO);
-        dup2(stderr_fd, STDERR_FILENO);
+        dup2(in_fd, STDIN_FILENO);
+        dup2(out_fd, STDOUT_FILENO);
+        dup2(err_fd, STDERR_FILENO);
         execl(tc->cmd, tc->cmd, NULL);
         perror("exec");
         exit(EXIT_FAILURE);
     }                           /* Parent */
-    close(stdin_fd);
-    close(stdout_fd);
-    close(stderr_fd);
+    close(in_fd);
+    close(out_fd);
+    close(err_fd);
 
     wait(&status);
 
-    test_context_analyze_test_run(tc, t, stdout_file, stderr_file, status);
+    test_context_analyze_test_run(tc, t, out_file, err_file, status);
 }
 
 void test_context_run_tests(TestContext *tc, List *tests, VerbosityMode verbose)
