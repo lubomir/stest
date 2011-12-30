@@ -11,4 +11,4 @@ LIBS = $(CUTTER_LIBS)
 LDFLAGS = -module -rpath $(libdir) -avoid-version -no-undefined
 
 test_list_la_SOURCES = test-list.c $(top_srcdir)/src/list.c
-test_utils_la_SOURCES = test-utils.c $(top_srcdir)/src/utils.c
+test_utils_la_SOURCES = test-utils.c $(top_srcdir)/src/utils.c $(top_srcdir)/src/list.c

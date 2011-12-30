@@ -134,4 +134,25 @@ char * get_filepath(const char *dir, const char *fname, const char *ext);
  */
 void copy_data(int source, int dest, unsigned int *lines);
 
+/**
+ * Parse string as command line arguments.
+ * This function tokenizes string into an array of strings in a similar way
+ * a shell does. It does not do:
+ *
+ *  * any wildcard expansion
+ *  * variable expansion
+ *  * command substitution
+ *  * arithmetic expansion
+ *  * handle comments
+ *
+ * and many more things.
+ *
+ * If string is invalid (e.g. unterminated quote), NULL is returned. Caller is
+ * responsible for freeing the memory.
+ *
+ * @param str   string to be parsed
+ * @return NULL-terminated array of strings or NULL on failure
+ */
+char ** parse_args(const char *str);
+
 #endif /* end of include guard: UTILS_H */

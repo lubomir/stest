@@ -161,3 +161,128 @@ test_copy_data_lines()
 
     cut_assert_equal_uint(3, lines);
 }
+
+void
+test_parse_args_single()
+{
+    char *expected[] = { "foo", NULL };
+    char *tests[] = {"foo", "  foo", "foo  ", "  foo  ", NULL};
+    int i = 0;
+
+    while (tests[i] != NULL) {
+        cut_assert_equal_string_array_with_free(expected,
+                parse_args(tests[i]),
+                cut_message("Input: >%s<", tests[i]));
+        i++;
+    }
+}
+
+void
+test_parse_args_double()
+{
+    char *expected[] = { "foo", "bar", NULL };
+    char *tests[] = { "foo bar", "  foo bar", "foo  bar", "foo bar  ",
+        "  foo bar  ", "  foo  bar  ", NULL };
+    int i = 0;
+
+    while (tests[i] != NULL) {
+        cut_assert_equal_string_array_with_free(expected,
+                parse_args(tests[i]),
+                cut_message("Input: >%s<", tests[i]));
+        i++;
+    }
+}
+
+void
+test_parse_args_escaped()
+{
+    char *expected[] = { "foo", "bar", "baz quux", NULL };
+    char *tests[] = {
+        "foo bar baz\" \"quux",
+        "foo bar \"baz quux\"",
+        "foo bar baz\\ quux",
+        "foo bar 'baz quux'",
+        "foo bar baz' 'quux",
+        "'foo' 'bar' \"baz quux\"",
+        NULL };
+    int i = 0;
+
+    while (tests[i] != NULL) {
+        cut_assert_equal_string_array_with_free(expected,
+                parse_args(tests[i]),
+                cut_message("Input: >%s<", tests[i]));
+        i++;
+    }
+}
+
+void
+test_parse_args_complicated()
+{
+    char *expected[] = { "\\", "'foo'", "bar\"baz", NULL };
+    char *tests[] = {
+        "\\\\       \"'foo'\"       bar\\\"baz",
+        "'\\'       \\\'foo\\\'     bar'\"'baz",
+        "\"\\\\\"   \\'foo\\'       bar'\"'baz",
+        "\"\\\\\"   \"'\"foo\"'\"   bar\"\\\"\"baz",
+        "'\\'       \"'\"foo\"'\"   bar\"\\\"\"baz",
+        NULL };
+    int i = 0;
+
+    while (tests[i] != NULL) {
+        cut_assert_equal_string_array_with_free(expected,
+                parse_args(tests[i]),
+                cut_message("Input: >%s<", tests[i]));
+        i++;
+    }
+}
+
+void
+test_parse_args_malformed()
+{
+    char *tests[] = {
+        "",
+        "  ",
+        "\"",
+        "'",
+        "\\",
+        "\"foo",
+        "'foo",
+        "foo\\",
+        "foo \"",
+        "foo '",
+        "foo \\",
+        "foo \" bar",
+        "foo ' bar",
+        "foo \"\\",
+        NULL };
+    int i = 0;
+
+    while (tests[i] != NULL) {
+        cut_assert_null(parse_args(tests[i]),
+                cut_message("Input: >%s<", tests[i]));
+        i++;
+    }
+}
+
+void
+test_parse_args_many()
+{
+    char *expected[] = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j",
+        "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x",
+        "y", "z", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L",
+        "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
+        NULL };
+    cut_assert_equal_string_array_with_free(expected,
+            parse_args("a b c d e f g h i j k l m n o p q r s t u v w x y z "
+                       "A B C D E F G H I J K L M N O P Q R S T U V W X Y Z"));
+}
+
+void
+test_parse_args_long()
+{
+    char *expected[] = { "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+        "1234567890987654321", NULL };
+    cut_assert_equal_string_array_with_free(expected,
+            parse_args("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ "
+                       " 1234567890987654321"));
+}

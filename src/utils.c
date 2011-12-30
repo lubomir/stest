@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "list.h"
 #include "utils.h"
 
 int number_sort_wrap(const struct dirent **entry1, const struct dirent **entry2)
@@ -99,4 +100,74 @@ void copy_data(int source, int dest, unsigned int *lines)
         if (lines != NULL)
             *lines += count_lines(buffer, len);
     }
+}
+
+/**
+ * Make s point to next character. If that character is terminating '\0',
+ * go to out label.
+ */
+#define try_inc_string(s) do { s++; if (*s == '\0') goto out; } while (0)
+
+char ** parse_args(const char *str)
+{
+    char **array;
+    List *list = NULL, *tmp;
+    char *string = NULL;
+    size_t idx = 0, i = 0;
+    char escape;
+
+    return_val_if_fail(str != NULL, NULL);
+
+    while (*str) {
+        if (string == NULL && *str != '\0') {
+            string = calloc(strlen(str) + 1, sizeof(char));
+            i = 0;
+        }
+        if (isspace(*str)) {
+            if (*string != '\0') {
+                list = list_prepend(list, string);
+                idx++;
+            } else {
+                free(string);
+            }
+            string = NULL;
+            i = 0;
+        } else if (*str == '\\') {
+            try_inc_string(str);
+            string[i++] = *str;
+        } else if (*str == '"' || *str == '\'') {
+            escape = *str;
+            do {
+                try_inc_string(str);
+                if (escape == '"' && *str == '\\') {
+                    try_inc_string(str);
+                    string[i++] = *str++;
+                }
+                if (*str != escape) string[i++] = *str;
+            } while (*str != escape);
+        } else {
+            string[i++] = *str;
+        }
+        str++;
+    }
+    if (string != NULL) {
+        list = list_prepend(list, string);
+        idx++;
+    }
+
+    if (idx == 0) goto out;
+
+    array = calloc(idx + 1, sizeof(char *));
+
+    idx--;
+    for (tmp = list; tmp != NULL; tmp = tmp->next) {
+        array[idx--] = tmp->data;
+    }
+    list_destroy(list, NULL);
+
+    return array;
+
+out:
+    if (list) list_destroy(list, DESTROYFUNC(free));
+    return NULL;
 }
