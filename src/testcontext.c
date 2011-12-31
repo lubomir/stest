@@ -13,7 +13,7 @@
 struct test_context_t {
     char *cmd;
     char *dir;
-    int logfd[2];
+    OQueue *logs;
     unsigned int test_num;
     unsigned int check_num;
     unsigned int check_failed;
@@ -29,10 +29,7 @@ TestContext * test_context_new(const char *cmd, const char *dir)
     tc->check_failed = 0;
     tc->verbose = MODE_QUIET;
     tc->dir = strdup(dir);
-    if (pipe(tc->logfd) < 0) {
-        perror("pipe");
-        exit(EXIT_FAILURE);
-    }
+    tc->logs = oqueue_new();
     return tc;
 }
 
@@ -41,7 +38,7 @@ void test_context_free(TestContext *tc)
     if (tc) {
         free(tc->cmd);
         free(tc->dir);
-        close(tc->logfd[PIPE_READ]);
+        oqueue_free(tc->logs);
     }
     free(tc);
 }
@@ -96,9 +93,8 @@ test_context_handle_result(TestContext *tc,
     va_list args;
     va_start(args, fmt);
     print_color(RED, "F");
-    dprintf(tc->logfd[PIPE_WRITE], "Test %s%s%s failed:\n",
-            BOLD, test->name, NORMAL);
-    vdprintf(tc->logfd[PIPE_WRITE], fmt, args);
+    oqueue_pushf(tc->logs, "Test %s%s%s failed:\n", BOLD, test->name, NORMAL);
+    oqueue_pushvf(tc->logs, fmt, args);
     return 1;
 }
 
@@ -151,7 +147,7 @@ test_context_check_output_file(TestContext *tc,
     pid_t child;
     int status, res;
     int mypipe[2];
-    unsigned int line_num = 0;
+    size_t line_num = 0;
 
     if (pipe(mypipe) < 0) {
         perror("pipe");
@@ -184,15 +180,12 @@ test_context_check_output_file(TestContext *tc,
     res = test_context_handle_result(tc, t,
             WEXITSTATUS(status) == 0, "std%s differs", ext);
     if (res != 0) {             /* checking failed */
-        if (tc->verbose) {
-            dprintf(tc->logfd[PIPE_WRITE], " - diff follows:\n");
-        }
-        copy_data(mypipe[PIPE_READ],
-                  tc->verbose ? tc->logfd[PIPE_WRITE] : -1,
-                  &line_num);
-        if (!tc->verbose) {
-            dprintf(tc->logfd[PIPE_WRITE], " - diff has %u lines\n",
-                    line_num - 2);
+        if (tc->verbose) {      /* Verbose means copying diff */
+            oqueue_push(tc->logs, " - diff follows:\n");
+            oqueue_copy_from_fd(tc->logs, mypipe[PIPE_READ]);
+        } else {                /* Otherwise only print how big the diff is */
+            line_num = count_lines_on_fd(mypipe[PIPE_READ]);
+            oqueue_pushf(tc->logs, " - diff has %zu lines\n", line_num - 2);
         }
     }
     close(mypipe[PIPE_READ]);
@@ -356,10 +349,9 @@ void test_context_run_tests(TestContext *tc, List *tests, VerbosityMode verbose)
     tc->verbose = verbose;
 
     list_foreach(tests, CBFUNC(test_context_run_test), tc);
-    close(tc->logfd[PIPE_WRITE]);
     printf("\n\n");
 
-    copy_data(tc->logfd[PIPE_READ], STDOUT_FILENO, NULL);
+    oqueue_flush(tc->logs, stdout);
 
     printf("\nRun %u tests, %u checks, %u failed\n",
             tc->test_num, tc->check_num, tc->check_failed);
