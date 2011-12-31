@@ -335,11 +335,11 @@ static void test_context_run_test(Test *t, TestContext *tc)
     close(out_fd);
     close(err_fd);
 
-    wait(&status);
-
     for (i = 0; args[i] != NULL; i++)
         free(args[i]);
     free(args);
+
+    wait(&status);
 
     test_context_analyze_test_run(tc, t, out_file, err_file, status);
 }
