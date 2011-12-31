@@ -88,18 +88,17 @@ char * get_filepath(const char *dir, const char *fname, const char *ext)
     return path;
 }
 
-void copy_data(int source, int dest, unsigned int *lines)
+size_t count_lines_on_fd(int source)
 {
     char buffer[1024];
     ssize_t len;
-    if (lines != NULL) *lines = 0;
+    size_t lines = 0;
 
     while ((len = read(source, buffer, 1024)) > 0) {
-        if (dest >= 0)
-            write(dest, buffer, sizeof(char) * len);
-        if (lines != NULL)
-            *lines += count_lines(buffer, len);
+        lines += count_lines(buffer, len);
     }
+
+    return lines;
 }
 
 /**
