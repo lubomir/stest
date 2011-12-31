@@ -1,6 +1,5 @@
 # TODO
 
-* create OutputQueue instead of a pipe (with (almost) unlimited capacity)
 * correctly handle crash of the tested program
 * add command line argument parsing for stest
 * test program using valgrind
@@ -8,5 +7,6 @@
 * test program via custom command (*.cmd)
 * enable execution of a script before and after test (*.pre, *.post)
 * handle bad arguments better - skip only that test
+* when testing ./dir/program, only pass program as argv[0]
 
 * allow building without tests
