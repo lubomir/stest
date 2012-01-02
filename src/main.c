@@ -6,6 +6,7 @@
 #include "list.h"
 #include "test.h"
 #include "testcontext.h"
+#include "utils.h"
 
 int main(int argc, char *argv[])
 {
@@ -22,7 +23,7 @@ int main(int argc, char *argv[])
         perror("stat");
         exit(EXIT_FAILURE);
     }
-    if ((info.st_mode & S_IXUSR) != S_IXUSR) {
+    if (!FLAG_SET(info.st_mode, S_IXUSR)) {
         fprintf(stderr, "Can not execute '%s'\n", argv[1]);
         exit(EXIT_FAILURE);
     }

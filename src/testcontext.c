@@ -56,7 +56,7 @@ static int test_context_get_stdin(TestContext *tc, Test *t)
 {
     int fd;
     char *input_file;
-    if ((t->parts & TEST_INPUT) != TEST_INPUT) {
+    if (!FLAG_SET(t->parts, TEST_INPUT)) {
         fd = open("/dev/null", O_RDONLY);
     } else {
         input_file = get_filepath(tc->dir, t->name, EXT_INPUT);
@@ -214,16 +214,16 @@ test_context_analyze_test_run(TestContext *tc,
         return;
     }
 
-    if ((test->parts & TEST_RETVAL) == TEST_RETVAL) {
+    if (FLAG_SET(test->parts, TEST_RETVAL)) {
         tc->check_num++;
         tc->check_failed += test_context_check_return_code(tc, test, status);
     }
-    if ((test->parts & TEST_OUTPUT) == TEST_OUTPUT) {
+    if (FLAG_SET(test->parts, TEST_OUTPUT)) {
         tc->check_num++;
         tc->check_failed += test_context_check_output_file(tc, test,
                 out_file, EXT_OUTPUT);
     }
-    if ((test->parts & TEST_ERRORS) == TEST_ERRORS) {
+    if (FLAG_SET(test->parts, TEST_ERRORS)) {
         tc->check_num++;
         tc->check_failed += test_context_check_output_file(tc, test,
                 err_file, EXT_ERRORS);

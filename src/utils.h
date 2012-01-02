@@ -79,6 +79,11 @@ enum {
 void print_color(const char *color, const char *str);
 
 /**
+ * Test if a certain bit is on in a bit mask
+ */
+#define FLAG_SET(mask,bit) (((mask) & (bit)) == (bit))
+
+/**
  * Each test has at least two parts.
  */
 typedef enum {
