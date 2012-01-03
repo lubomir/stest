@@ -43,7 +43,8 @@ void oqueue_push(OQueue *q, char *str);
  * @param fmt   printf-like formatting string
  * @param ...   arguments for format
  */
-void oqueue_pushf(OQueue *q, const char *fmt, ...);
+void oqueue_pushf(OQueue *q, const char *fmt, ...)
+    __attribute__ ((format (printf, 2, 3)));
 
 /**
  * This function is exactly same as oqueue_pushf() except that is called with
