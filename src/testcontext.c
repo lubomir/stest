@@ -27,7 +27,7 @@ TestContext * test_context_new(const char *cmd, const char *dir)
     tc->test_num = 0;
     tc->check_num = 0;
     tc->check_failed = 0;
-    tc->verbose = MODE_QUIET;
+    tc->verbose = MODE_NORMAL;
     tc->dir = strdup(dir);
     tc->logs = oqueue_new();
     return tc;
@@ -42,6 +42,11 @@ void test_context_free(TestContext *tc)
     }
     free(tc);
 }
+
+/**
+ * Return 1 if test context is to set to be totally quiet.
+ */
+#define TC_IS_QUIET(tc) (tc->verbose == MODE_QUIET)
 
 /**
  * Check if condition holds and print appropriate message to stdout.
@@ -60,12 +65,12 @@ test_context_handle_result(TestContext *tc,
                            ...)
 {
     if (cond) {
-        print_color(GREEN, ".");
+        if (!TC_IS_QUIET(tc)) print_color(GREEN, ".");
         return 0;
     }
     va_list args;
     va_start(args, fmt);
-    print_color(RED, "F");
+    if (!TC_IS_QUIET(tc)) print_color(RED, "F");
     oqueue_pushf(tc->logs, "Test %s%s%s failed:\n", BOLD, test->name, NORMAL);
     oqueue_pushvf(tc->logs, fmt, args);
     return 1;
@@ -146,7 +151,8 @@ test_context_check_output_file(TestContext *tc,
     res = test_context_handle_result(tc, t,
             WEXITSTATUS(status) == 0, "std%s differs", ext);
     if (res != 0) {             /* checking failed */
-        if (tc->verbose) {      /* Verbose means copying diff */
+        if (tc->verbose == MODE_VERBOSE) {
+            /* Verbose means copying diff */
             oqueue_push(tc->logs, " - diff follows:\n");
             oqueue_copy_from_fd(tc->logs, mypipe[PIPE_READ]);
         } else {                /* Otherwise only print how big the diff is */
@@ -194,7 +200,7 @@ test_context_analyze_test_run(TestContext *tc,
         tc->check_failed += test_context_check_output_file(tc, test,
                 err_file, EXT_ERRORS);
     }
-    putchar(' ');
+    if (!TC_IS_QUIET(tc)) putchar(' ');
     unlink(out_file);
     unlink(err_file);
 }
@@ -293,10 +299,11 @@ void test_context_run_tests(TestContext *tc, List *tests, VerbosityMode verbose)
     tc->verbose = verbose;
 
     list_foreach(tests, CBFUNC(test_context_run_test), tc);
-    printf("\n\n");
 
-    oqueue_flush(tc->logs, stdout);
-
-    printf("\nRun %u tests, %u checks, %u failed\n",
-            tc->test_num, tc->check_num, tc->check_failed);
+    if (!TC_IS_QUIET(tc)) {
+        printf("\n\n");
+        oqueue_flush(tc->logs, stdout);
+        printf("\nRun %u tests, %u checks, %u failed\n",
+                tc->test_num, tc->check_num, tc->check_failed);
+    }
 }
