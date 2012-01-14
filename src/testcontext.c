@@ -86,15 +86,8 @@ test_context_check_return_code(TestContext *tc, Test *test, int status)
     FILE *fh;
     int expected, actual;
 
-    filename = get_filepath(tc->dir, test->name, EXT_RETVAL);
-    fh = fopen(filename, "r");
-    free(filename);
-    if (fh == NULL) {
-        perror("fopen");
-        exit(EXIT_FAILURE);
-    }
-    fscanf(fh, " %d", &expected);
-    fclose(fh);
+    expected = test_get_exit_code(test);
+    if (expected < 0) exit(EXIT_FAILURE);
 
     actual = WEXITSTATUS(status);
     return test_context_handle_result(tc, test, expected == actual,

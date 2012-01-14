@@ -49,4 +49,12 @@ int test_get_input_fd(Test *t);
  */
 char ** test_get_args(Test *test, size_t *count);
 
+/**
+ * Get expected exit code for this test.
+ *
+ * @param test  test
+ * @return expected exit code or -1 on failure
+ */
+int test_get_exit_code(Test *test);
+
 #endif /* end of include guard: TEST_H */

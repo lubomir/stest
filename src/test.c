@@ -111,3 +111,19 @@ out1:
     free(path);
     return args;
 }
+
+int test_get_exit_code(Test *test)
+{
+    FILE *fh;
+    int code = -1;
+    char *path;
+
+    path = get_filepath(test->dir, test->name, EXT_RETVAL);
+    fh = fopen(path, "r");
+    if (fh == NULL) goto out;
+    fscanf(fh, " %d", &code);
+    fclose(fh);
+out:
+    free(path);
+    return code;
+}
