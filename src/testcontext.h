@@ -7,6 +7,7 @@
 
 typedef enum {
     MODE_QUIET,
+    MODE_NORMAL,
     MODE_VERBOSE
 } VerbosityMode;
 

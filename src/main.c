@@ -1,5 +1,6 @@
 #include <config.h>
 
+#include <getopt.h>
 #include <stdio.h>
 #include <sys/stat.h>
 
@@ -8,28 +9,95 @@
 #include "testcontext.h"
 #include "utils.h"
 
+#define OPTSTRING "hmvq"
+
+static void usage(const char *progname)
+{
+    printf("Usage: %s [%s] COMMAND [TESTDIR]\n", progname, OPTSTRING);
+}
+
+static void help(void)
+{
+    puts("SYNOPSIS");
+    puts("\tstest ["OPTSTRING"] COMMAND [TESTDIR]");
+
+    puts("\nOPTIONS");
+    puts("\t-h, --help\n\t\tdisplay this help\n");
+    puts("\t-m, --memory\n\t\trun Valgrind memory checking tool\n");
+    puts("\t-v, --verbose\n\t\tdisplay output diff of failed tests\n");
+    puts("\t-q, --quiet\n\t\tsuppress all output\n");
+    puts("\tIf TESTDIR is not specified, use ./tests directory.");
+
+    puts("\nRETURN VALUE");
+    puts("\tOn success of all tests return 0, otherwise exit with number of");
+    puts("\tfailed tests. If options are bad, other return values are possible:");
+    puts("\t253\tbad command name");
+    puts("\t254\tbad directory with tests");
+    puts("\t255\tunrecognized options");
+}
+
 int main(int argc, char *argv[])
 {
     struct stat info;
+    char *cmd, *dir = "tests";
 
-    if (argc != 2) {
-        fprintf(stderr, "USAGE: %s PROGRAM\n", argv[0]);
-        return 1;
+    int use_valgrind = 0;
+    int verbosity_level = MODE_NORMAL;
+    char c;
+
+    static const struct option long_options[] = {
+        { "memory",  no_argument, NULL, 'm' },
+        { "verbose", no_argument, NULL, 'v' },
+        { "quiet",   no_argument, NULL, 'q' },
+        { "help",    no_argument, NULL, 'h' },
+        { 0, 0, 0, 0 }
+    };
+
+    while (1) {
+        int option_index = 0;
+        c = getopt_long(argc, argv, OPTSTRING, long_options, &option_index);
+        if (c == -1) break;
+
+        switch (c) {
+        case 'h':
+            help();
+            return 0;
+        case 'm':
+            use_valgrind = 1;
+            break;
+        case 'v':
+            verbosity_level = MODE_VERBOSE;
+            break;
+        case 'q':
+            verbosity_level = MODE_QUIET;
+            break;
+        default:
+            usage(argv[0]);
+            return 255;
+        }
+    };
+    if (optind >= argc) {
+        fprintf(stderr, "Missing command name\n");
+        return 253;
+    }
+    cmd = argv[optind];
+    if (++optind < argc) {
+        dir = argv[optind];
     }
 
-    List *tests = test_load_from_dir("tests");
+    List *tests = test_load_from_dir(dir);
 
-    if (stat(argv[1], &info) == -1) {
+    if (stat(cmd, &info) == -1) {
         perror("stat");
         exit(EXIT_FAILURE);
     }
     if (!FLAG_SET(info.st_mode, S_IXUSR)) {
-        fprintf(stderr, "Can not execute '%s'\n", argv[1]);
+        fprintf(stderr, "Can not execute '%s'\n", cmd);
         exit(EXIT_FAILURE);
     }
 
-    TestContext *tc = test_context_new(argv[1], "tests");
-    test_context_run_tests(tc, tests, MODE_VERBOSE);
+    TestContext *tc = test_context_new(cmd, dir);
+    test_context_run_tests(tc, tests, verbosity_level);
     list_destroy(tests, DESTROYFUNC(test_free));
     test_context_free(tc);
 
