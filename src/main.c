@@ -40,6 +40,7 @@ int main(int argc, char *argv[])
 {
     struct stat info;
     char *cmd, *dir = "tests";
+    unsigned int failed_checks;
 
     int use_valgrind = 0;
     int verbosity_level = MODE_NORMAL;
@@ -97,9 +98,9 @@ int main(int argc, char *argv[])
     }
 
     TestContext *tc = test_context_new(cmd, dir);
-    test_context_run_tests(tc, tests, verbosity_level);
+    failed_checks = test_context_run_tests(tc, tests, verbosity_level);
     list_destroy(tests, DESTROYFUNC(test_free));
     test_context_free(tc);
 
-    return 0;
+    return failed_checks;
 }

@@ -35,7 +35,9 @@ void test_context_free(TestContext *tc);
  * @param tc        context to run in
  * @param tests     tests to be executed (list of Test objects)
  * @param verbose   whether to print diffs (if any)
+ * @return number of failed checks
  */
-void test_context_run_tests(TestContext *tc, List *tests, VerbosityMode verbose);
+unsigned int
+test_context_run_tests(TestContext *tc, List *tests, VerbosityMode verbose);
 
 #endif /* end of include guard: TESTCONTEXT_H */

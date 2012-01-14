@@ -294,7 +294,8 @@ static void test_context_run_test(Test *t, TestContext *tc)
     test_context_analyze_test_run(tc, t, out_file, err_file, status);
 }
 
-void test_context_run_tests(TestContext *tc, List *tests, VerbosityMode verbose)
+unsigned int
+test_context_run_tests(TestContext *tc, List *tests, VerbosityMode verbose)
 {
     tc->verbose = verbose;
 
@@ -306,4 +307,5 @@ void test_context_run_tests(TestContext *tc, List *tests, VerbosityMode verbose)
         printf("\nRun %u tests, %u checks, %u failed\n",
                 tc->test_num, tc->check_num, tc->check_failed);
     }
+    return tc->check_failed;
 }
