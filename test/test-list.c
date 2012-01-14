@@ -11,7 +11,7 @@ test_prepending_into_null()
     List *l = list_prepend(NULL, &x);
     cut_assert_not_null(l);
     cut_assert_null(l->next);
-    cut_assert_equal_intptr(&x, l->data);
+    cut_assert_equal_pointer(&x, l->data);
 }
 
 void
@@ -21,7 +21,7 @@ test_append_to_null()
     List *l = list_append(NULL, &x);
     cut_assert_not_null(l);
     cut_assert_null(l->next);
-    cut_assert_equal_intptr(&x, l->data);
+    cut_assert_equal_pointer(&x, l->data);
 }
 
 void
@@ -31,9 +31,9 @@ test_two_prepends()
     List *l = list_prepend(NULL, &x);
     l = list_prepend(l, &y);
     cut_assert_not_null(l);
-    cut_assert_equal_intptr(&y, l->data);
+    cut_assert_equal_pointer(&y, l->data);
     cut_assert_not_null(l->next);
-    cut_assert_equal_intptr(&x, l->next->data);
+    cut_assert_equal_pointer(&x, l->next->data);
     cut_assert_null(l->next->next);
 }
 
@@ -43,12 +43,12 @@ test_two_appends()
     List *l = list_append(NULL, INT_TO_POINTER(1));
     cut_assert_not_null(l);
     cut_assert_null(l->next);
-    cut_assert_equal_intptr(INT_TO_POINTER(1), l->data);
+    cut_assert_equal_pointer(INT_TO_POINTER(1), l->data);
 
     l = list_append(l, INT_TO_POINTER(2));
-    cut_assert_equal_intptr(INT_TO_POINTER(1), l->data);
+    cut_assert_equal_pointer(INT_TO_POINTER(1), l->data);
     cut_assert_not_null(l->next);
-    cut_assert_equal_intptr(INT_TO_POINTER(2), l->next->data);
+    cut_assert_equal_pointer(INT_TO_POINTER(2), l->next->data);
     cut_assert_null(l->next->next);
 }
 
@@ -62,11 +62,11 @@ test_reverse_list()
     l = list_reverse(l);
 
     cut_assert_not_null(l);
-    cut_assert_equal_intptr(INT_TO_POINTER(1), l->data);
+    cut_assert_equal_pointer(INT_TO_POINTER(1), l->data);
     cut_assert_not_null(l->next);
-    cut_assert_equal_intptr(INT_TO_POINTER(2), l->next->data);
+    cut_assert_equal_pointer(INT_TO_POINTER(2), l->next->data);
     cut_assert_not_null(l->next->next);
-    cut_assert_equal_intptr(INT_TO_POINTER(3), l->next->next->data);
+    cut_assert_equal_pointer(INT_TO_POINTER(3), l->next->next->data);
     cut_assert_null(l->next->next->next);
 }
 
