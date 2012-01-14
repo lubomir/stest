@@ -39,4 +39,14 @@ void test_free(Test *test);
  */
 int test_get_input_fd(Test *t);
 
+/**
+ * Get argument list for this test. Returns NULL-terminated list of strings on
+ * success, NULL if file can not be opened or contains malformed arguments.
+ *
+ * @param test  test
+ * @return NULL if arguments are malformed, otherwise return NULL-terminated
+ *         array of strings
+ */
+char ** test_get_args(Test *test, size_t *count);
+
 #endif /* end of include guard: TEST_H */

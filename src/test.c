@@ -74,3 +74,40 @@ int test_get_input_fd(Test *test)
     }
     return fd;
 }
+
+char ** test_get_args(Test *test, size_t *count)
+{
+    char **args = NULL;
+    FILE *fh;
+    char *path, *line = NULL;
+    size_t len = 0;
+    ssize_t read;
+
+    if (!FLAG_SET(test->parts, TEST_ARGS)) {
+        args = malloc(sizeof(char*));
+        args[0] = NULL;
+        *count = 1;
+        return args;
+    }
+
+    path = get_filepath(test->dir, test->name, EXT_ARGS);
+    fh = fopen(path, "r");
+    if (fh == NULL) {
+        perror("Can not open arguments file");
+        goto out1;
+    }
+    read = getline(&line, &len, fh);
+    if (read < 0) {
+        fprintf(stderr, "Can not read arguments\n");
+        goto out2;
+    }
+    args = parse_args(line, count);
+
+    printf("%zu\n", *count);
+    free(line);
+out2:
+    fclose(fh);
+out1:
+    free(path);
+    return args;
+}

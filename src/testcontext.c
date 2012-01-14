@@ -238,36 +238,15 @@ static char **
 test_context_get_args(TestContext *tc, Test *t)
 {
     char **args = NULL;
-    char *line = NULL, *fname;
-    size_t len = 0, count;
-    FILE *fh;
+    size_t count = 0;
 
-    if ((t->parts & TEST_ARGS) == TEST_ARGS) {
-        fname = get_filepath(tc->dir, t->name, EXT_ARGS);
-        fh = fopen(fname, "r");
-        if (fh == NULL) {
-            perror("Can not open args file");
-            exit(EXIT_FAILURE);
-        }
-        if (getline(&line, &len, fh) < 0) {
-            fprintf(stderr, "Can not read arguments from %s\n", fname);
-            exit(EXIT_FAILURE);
-        }
-        fclose(fh);
-        free(fname);
-        args = parse_args(line, &count);
-        if (args == NULL) {
-            fprintf(stderr, "Can not parse arguments for test %s\n", t->name);
-            exit(EXIT_FAILURE);
-        }
-
-        args = realloc(args, (count + 1) * sizeof(char *));
-        memmove(args+1, args, count * sizeof(char *));
-    } else {
-        args = calloc(2, sizeof(char **));
-        args[1] = NULL;
+    args = test_get_args(t, &count);
+    if (args == NULL) {
+        fprintf(stderr, "Can not read arguments\n");
+        exit(EXIT_FAILURE);
     }
-    free(line);
+    args = realloc(args, (count + 1) * sizeof(char *));
+    memmove(args+1, args, count * sizeof(char *));
     args[0] = get_command_name(tc->cmd);
     return args;
 }
