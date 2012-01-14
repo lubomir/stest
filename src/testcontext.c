@@ -44,33 +44,6 @@ void test_context_free(TestContext *tc)
 }
 
 /**
- * Open file descriptor with input for given test. If test does not specify
- * any input, /dev/null is opened and passed. It is responsibility of caller
- * to close this descriptor.
- *
- * @param tc    test context
- * @param t     test
- * @return file descriptor with new standard input
- */
-static int test_context_get_stdin(TestContext *tc, Test *t)
-{
-    int fd;
-    char *input_file;
-    if (!FLAG_SET(t->parts, TEST_INPUT)) {
-        fd = open("/dev/null", O_RDONLY);
-    } else {
-        input_file = get_filepath(tc->dir, t->name, EXT_INPUT);
-        fd = open(input_file, O_RDONLY);
-        free(input_file);
-    }
-    if (fd < 0) {
-        perror("open");
-        exit(EXIT_FAILURE);
-    }
-    return fd;
-}
-
-/**
  * Check if condition holds and print appropriate message to stdout.
  *
  * @param tc    test context
@@ -315,9 +288,8 @@ static void test_context_run_test(Test *t, TestContext *tc)
     char **args;
 
     test_context_prepare_outfiles(out_file, &out_fd, err_file, &err_fd);
-    in_fd = test_context_get_stdin(tc, t);
+    in_fd = test_get_input_fd(t);
     args = test_context_get_args(tc, t);
-
 
     child = fork();
     if (child == -1) {

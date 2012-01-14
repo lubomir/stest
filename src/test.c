@@ -1,5 +1,7 @@
 #define _POSIX_C_SOURCE 200809L
 
+#include <fcntl.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -20,6 +22,7 @@ List * test_load_from_dir(const char *dir)
 
     for (i = 0; i < files_num;) {
         test = malloc(sizeof(Test));
+        test->dir = dir;
         test->parts = 0;
         dot = strchr(entries[i]->d_name, '.');
         if (dot == NULL) {
@@ -52,4 +55,22 @@ void test_free(Test *test)
         free(test->name);
         free(test);
     }
+}
+
+int test_get_input_fd(Test *test)
+{
+    int fd;
+    char *input_file;
+    if (!FLAG_SET(test->parts, TEST_INPUT)) {
+        fd = open("/dev/null", O_RDONLY);
+    } else {
+        input_file = get_filepath(test->dir, test->name, EXT_INPUT);
+        fd = open(input_file, O_RDONLY);
+        free(input_file);
+    }
+    if (fd < 0) {
+        perror("open");
+        exit(EXIT_FAILURE);
+    }
+    return fd;
 }

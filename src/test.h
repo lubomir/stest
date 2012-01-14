@@ -10,6 +10,7 @@
 typedef struct test_t Test;
 struct test_t {
     char *name;
+    const char *dir;
     uint8_t parts;
 };
 
@@ -27,5 +28,15 @@ List * test_load_from_dir(const char *dir);
  * @param test  test to be freed
  */
 void test_free(Test *test);
+
+/**
+ * Open file descriptor with input for given test. If test does not specify
+ * any input, /dev/null is opened and passed. It is responsibility of caller
+ * to close this descriptor.
+ *
+ * @param test  test
+ * @return file descriptor with new standard input
+ */
+int test_get_input_fd(Test *t);
 
 #endif /* end of include guard: TEST_H */
