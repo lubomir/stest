@@ -50,6 +50,7 @@ void print_color(const char *color, const char *str)
 {
     if (isatty(STDOUT_FILENO)) {
         printf("%s%s%s", color, str, NORMAL);
+        fflush(stdout);
     } else {
         printf("%s", str);
     }
