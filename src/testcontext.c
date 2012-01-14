@@ -268,7 +268,7 @@ test_context_get_args(TestContext *tc, Test *t)
         args[1] = NULL;
     }
     free(line);
-    args[0] = strdup(tc->cmd);
+    args[0] = get_command_name(tc->cmd);
     return args;
 }
 

@@ -163,4 +163,12 @@ size_t count_lines_on_fd(int source);
  */
 char ** parse_args(const char *str, size_t *len);
 
+/**
+ * Strip leading directories from command line. Returned string must be freed.
+ *
+ * @param cmdline   command used to execute program
+ * @return command name
+ */
+char * get_command_name(const char *cmdline);
+
 #endif /* end of include guard: UTILS_H */
