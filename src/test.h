@@ -10,7 +10,7 @@
 typedef struct test_t Test;
 struct test_t {
     char *name;
-    const char *dir;
+    char *dir;
     uint8_t parts;
 };
 

@@ -22,7 +22,7 @@ List * test_load_from_dir(const char *dir)
 
     for (i = 0; i < files_num;) {
         test = malloc(sizeof(Test));
-        test->dir = dir;
+        test->dir = strdup(dir);
         test->parts = 0;
         dot = strchr(entries[i]->d_name, '.');
         if (dot == NULL) {
@@ -53,6 +53,7 @@ void test_free(Test *test)
 {
     if (test) {
         free(test->name);
+        free(test->dir);
         free(test);
     }
 }
