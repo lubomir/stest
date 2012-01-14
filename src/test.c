@@ -19,6 +19,7 @@ List * test_load_from_dir(const char *dir)
     TestPart tp;
 
     files_num = scandir(dir, &entries, filter_tests_wrap, number_sort_wrap);
+    if (files_num < 0) return NULL;
 
     for (i = 0; i < files_num;) {
         test = malloc(sizeof(Test));

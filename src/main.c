@@ -87,6 +87,10 @@ int main(int argc, char *argv[])
     }
 
     List *tests = test_load_from_dir(dir);
+    if (tests == NULL) {
+        perror("Can not open directory with tests");
+        return 254;
+    }
 
     if (stat(cmd, &info) == -1) {
         perror("stat");

@@ -18,7 +18,7 @@ struct test_t {
  * Load all test definitions from a directory.
  *
  * @param dir   path to directory with tests
- * @return      list of tests
+ * @return      list of tests or NULL on failure
  */
 List * test_load_from_dir(const char *dir);
 
