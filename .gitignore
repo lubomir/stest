@@ -14,6 +14,7 @@ missing
 stamp-h1
 
 src/stest
+src/gen-test
 */.deps
 */.libs
 

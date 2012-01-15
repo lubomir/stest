@@ -1,4 +1,4 @@
-noinst_LTLIBRARIES = test_list.la test_utils.la test_oqueue.la
+noinst_LTLIBRARIES = test_list.la test_utils.la test_oqueue.la test_genutils.la
 
 TESTS = run-test.sh
 TESTS_ENVIRONMENT = NO_MAKE="yes" CUTTER="$(CUTTER)"
@@ -18,3 +18,5 @@ test_oqueue_la_SOURCES = test-oqueue.c \
 			 $(top_srcdir)/src/list.c \
 			 $(top_srcdir)/src/utils.c \
 			 $(top_srcdir)/src/outputqueue.c
+test_genutils_la_SOURCES = test-genutils.c \
+			   $(top_srcdir)/src/genutils.c
