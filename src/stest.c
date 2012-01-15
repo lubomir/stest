@@ -9,7 +9,7 @@
 #include "testcontext.h"
 #include "utils.h"
 
-#define OPTSTRING "hmvq"
+#define OPTSTRING "hmvqV"
 
 static void usage(const char *progname)
 {
@@ -26,6 +26,7 @@ static void help(void)
     puts("\t-m, --memory\n\t\trun Valgrind memory checking tool\n");
     puts("\t-v, --verbose\n\t\tdisplay output diff of failed tests\n");
     puts("\t-q, --quiet\n\t\tsuppress all output\n");
+    puts("\t-V, --version\n\t\tdisplay version info\n");
     puts("\tIf TESTDIR is not specified, use ./tests directory.");
 
     puts("\nRETURN VALUE");
@@ -51,6 +52,7 @@ int main(int argc, char *argv[])
         { "verbose", no_argument, NULL, 'v' },
         { "quiet",   no_argument, NULL, 'q' },
         { "help",    no_argument, NULL, 'h' },
+        { "version", no_argument, NULL, 'V' },
         { 0, 0, 0, 0 }
     };
 
@@ -72,6 +74,9 @@ int main(int argc, char *argv[])
         case 'q':
             verbosity_level = MODE_QUIET;
             break;
+        case 'V':
+            printf("%s %s\n", PACKAGE_NAME, VERSION);
+            return 0;
         default:
             usage(argv[0]);
             return 255;
