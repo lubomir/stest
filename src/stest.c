@@ -81,7 +81,8 @@ int main(int argc, char *argv[])
             usage(argv[0]);
             return 255;
         }
-    };
+    }
+
     if (optind >= argc) {
         fprintf(stderr, "Missing command name\n");
         return 253;
