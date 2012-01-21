@@ -8,6 +8,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+static const char *stream_name[] = { "input", "output", "errors" };
+static const char *exts[] = { EXT_INPUT, EXT_OUTPUT, EXT_ERRORS };
+
+/**
+ * Print information about a test.
+ */
 static void
 print_test(void *t, void *data)
 {
@@ -20,6 +26,11 @@ print_test(void *t, void *data)
             FLAG_SET(test->parts, TEST_RETVAL)  ? 'R' : ' ');
 }
 
+/**
+ * List all tests in a directory.
+ *
+ * @param dir   directory to list
+ */
 static void
 list_tests(const char *dir)
 {
@@ -39,6 +50,15 @@ copy_from_to(FILE *from, FILE *to)
     } while (len == 1024);
 }
 
+/**
+ * Create a file and save a string into it.
+ *
+ * @param dir   directory for the file
+ * @param name  base name of the file
+ * @param ext   extension of the file
+ * @param value string to be stored
+ * @param msg   information about file, for error message
+ */
 static void
 print_to_file(const char *dir, const char *name, const char *ext,
               const char *value, const char *msg)
@@ -53,6 +73,29 @@ print_to_file(const char *dir, const char *name, const char *ext,
     fprintf(fh, "%s\n", value);
     free(path);
     fclose(fh);
+}
+
+/**
+ * Check if arguments are consistent and print error message for each
+ * inconsistency.
+ *
+ * @param from_user array of 3 ints indicating whether to load from console
+ * @param files     array of 3 filenames to load
+ * @return number of failed checks
+ */
+static int
+check_consistency(int *from_user, char **files)
+{
+    int i, count = 0;
+    for (i = 0; i < 3; i++) {
+        if (files[i] != NULL && from_user[i]) {
+            fprintf(stderr,
+                    "You can not load %s from console and file at the same time.\n",
+                    stream_name[i]);
+            count++;
+        }
+    }
+    return count;
 }
 
 #define OPTSTRING "ioer:a:lhV"
@@ -78,9 +121,6 @@ static const struct option long_options[] = {
     { "version",    no_argument,        NULL, 'V' },
     { 0, 0, 0, 0 }
 };
-
-static const char *stream_name[] = { "input", "output", "errors" };
-static const char *exts[] = { EXT_INPUT, EXT_OUTPUT, EXT_ERRORS };
 
 int main(int argc, char *argv[])
 {
@@ -122,13 +162,13 @@ int main(int argc, char *argv[])
             break;
         case 'h':
             help();
-            return 0;
+            return EXIT_SUCCESS;
         case 'V':
             printf("%s %s\n", PACKAGE_NAME, VERSION);
-            return 0;
+            return EXIT_SUCCESS;
         default:
             usage(argv[0]);
-            return 1;
+            return EXIT_FAILURE;
         }
     }
     if (optind < argc) {
@@ -137,17 +177,12 @@ int main(int argc, char *argv[])
 
     if (opt_list_tests) {
         list_tests(dir);
-        return 0;
+        return EXIT_SUCCESS;
     }
 
-    for (i = 0; i < 3; i++) {
-        if (files[i] != NULL && from_user[i]) {
-            fprintf(stderr,
-                    "You can not load %s from console and file at the same time.\n",
-                    stream_name[i]);
-            usage(argv[0]);
-            exit(EXIT_FAILURE);
-        }
+    if (check_consistency(from_user, files) > 0) {
+        usage(argv[0]);
+        return EXIT_FAILURE;
     }
 
     int test_no = get_test_num(dir) + 1;
@@ -189,5 +224,5 @@ int main(int argc, char *argv[])
     if (args)   print_to_file(dir, test_name, EXT_ARGS, args, "arguments");
     if (retval) print_to_file(dir, test_name, EXT_RETVAL, retval, "exit code");
 
-    return 0;
+    return EXIT_SUCCESS;
 }
