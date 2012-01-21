@@ -264,34 +264,12 @@ test_context_skip(TestContext *tc, Test *t, const char *msg)
     tc->skipped++;
 }
 
-/**
- * Run a test in given context and analyze the results.
- *
- * @param t     test to be run
- * @param tc    test context
- */
-static void test_context_run_test(Test *t, TestContext *tc)
+static void
+test_context_execute_test(TestContext *tc, Test *t,
+        int in_fd, int out_fd, int err_fd, char **args)
 {
-    int in_fd, out_fd, err_fd, i;
-    char out_file[] = "/tmp/stest-stdout-XXXXXX";
-    char err_file[] = "/tmp/stest-stderr-XXXXXX";
-    pid_t child;
-    int status;
-    char **args;
     static char *env[] = { "MALLOC_CHECK_=2", NULL };
-
-    if (!test_context_prepare_outfiles(out_file, &out_fd, err_file, &err_fd)) {
-        test_context_skip(tc, t, "can not open temporary files");
-        goto out;
-    }
-    if ((in_fd = test_get_input_fd(t)) < 0) {
-        test_context_skip(tc, t, "can not open input file");
-        goto out;
-    }
-    if ((args = test_context_get_args(tc, t)) == NULL) {
-        test_context_skip(tc, t, "can not read arguments");
-        goto out;
-    }
+    int child;
 
     child = fork();
     if (child == -1) {
@@ -308,6 +286,37 @@ static void test_context_run_test(Test *t, TestContext *tc)
     close(in_fd);
     close(out_fd);
     close(err_fd);
+}
+
+/**
+ * Run a test in given context and analyze the results.
+ *
+ * @param t     test to be run
+ * @param tc    test context
+ */
+static void test_context_run_test(Test *t, TestContext *tc)
+{
+    int in_fd, out_fd, err_fd, i;
+    char out_file[] = "/tmp/stest-stdout-XXXXXX";
+    char err_file[] = "/tmp/stest-stderr-XXXXXX";
+    pid_t child;
+    int status;
+    char **args;
+
+    if (!test_context_prepare_outfiles(out_file, &out_fd, err_file, &err_fd)) {
+        test_context_skip(tc, t, "can not open temporary files");
+        goto out;
+    }
+    if ((in_fd = test_get_input_fd(t)) < 0) {
+        test_context_skip(tc, t, "can not open input file");
+        goto out;
+    }
+    if ((args = test_context_get_args(tc, t)) == NULL) {
+        test_context_skip(tc, t, "can not read arguments");
+        goto out;
+    }
+
+    test_context_execute_test(tc, t, in_fd, out_fd, err_fd, args);
 
     for (i = 0; args[i] != NULL; i++)
         free(args[i]);
