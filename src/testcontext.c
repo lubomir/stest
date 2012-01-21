@@ -166,6 +166,24 @@ test_context_check_output_file(TestContext *tc,
 }
 
 /**
+ * Check if a test should be performed and optionally perform it. Please note
+ * that checking function is only called if the test should be performed.
+ * First and second argument of checking function should be test context and
+ * test, respectively.
+ *
+ * @param tc    test context
+ * @param t     test
+ * @param part  part of a test
+ * @param f     function that performs the check
+ * @param ...   additional arguments to checking function
+ */
+#define test_context_check(tc, t, part, f, ...)  do {   \
+    if (FLAG_SET(t->parts, part)) {                     \
+        tc->check_num++;                                \
+        tc->check_failed += f(tc, t, __VA_ARGS__);      \
+    } } while (0)
+
+/**
  * Check outputs of a program and update counters accordingly.
  *
  * @param tc    test context
@@ -193,20 +211,12 @@ test_context_analyze_test_run(TestContext *tc,
         return;
     }
 
-    if (FLAG_SET(test->parts, TEST_RETVAL)) {
-        tc->check_num++;
-        tc->check_failed += test_context_check_return_code(tc, test, status);
-    }
-    if (FLAG_SET(test->parts, TEST_OUTPUT)) {
-        tc->check_num++;
-        tc->check_failed += test_context_check_output_file(tc, test,
-                out_file, EXT_OUTPUT);
-    }
-    if (FLAG_SET(test->parts, TEST_ERRORS)) {
-        tc->check_num++;
-        tc->check_failed += test_context_check_output_file(tc, test,
-                err_file, EXT_ERRORS);
-    }
+    test_context_check(tc, test, TEST_RETVAL,
+            test_context_check_return_code, status);
+    test_context_check(tc, test, TEST_OUTPUT,
+            test_context_check_output_file, out_file, EXT_OUTPUT);
+    test_context_check(tc, test, TEST_ERRORS,
+            test_context_check_output_file, err_file, EXT_ERRORS);
 }
 
 /**
