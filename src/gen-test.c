@@ -21,6 +21,14 @@ print_test(void *t, void *data)
 }
 
 static void
+list_tests(const char *dir)
+{
+    List *tests = test_load_from_dir(dir);
+    list_foreach(tests, print_test, NULL);
+    list_destroy(tests, DESTROYFUNC(test_free));
+}
+
+static void
 copy_from_to(FILE *from, FILE *to)
 {
     char buffer[1024];
@@ -29,6 +37,22 @@ copy_from_to(FILE *from, FILE *to)
         len = fread(buffer, sizeof(char), 1024, from);
         fwrite(buffer, sizeof(char), len, to);
     } while (len == 1024);
+}
+
+static void
+print_to_file(const char *dir, const char *name, const char *ext,
+              const char *value, const char *msg)
+{
+    char *path = get_filepath(dir, name, ext);
+    FILE *fh = fopen(path, "w");
+    if (fh == NULL) {
+        fprintf(stderr, "Can not open %s file '%s'", msg, path);
+        perror("");
+        exit(EXIT_FAILURE);
+    }
+    fprintf(fh, "%s\n", value);
+    free(path);
+    fclose(fh);
 }
 
 #define OPTSTRING "ioer:a:lhV"
@@ -61,7 +85,7 @@ static const char *exts[] = { EXT_INPUT, EXT_OUTPUT, EXT_ERRORS };
 int main(int argc, char *argv[])
 {
     char c;
-    int i, list_tests = 0;
+    int i, opt_list_tests = 0;
     char *dir = "tests";
     char buffer[128], test_name[128];
     char *files[] = { NULL, NULL, NULL };
@@ -94,7 +118,7 @@ int main(int argc, char *argv[])
             break;
 
         case 'l':
-            list_tests = 1;
+            opt_list_tests = 1;
             break;
         case 'h':
             help();
@@ -111,10 +135,8 @@ int main(int argc, char *argv[])
         dir = argv[optind];
     }
 
-    if (list_tests) {
-        List *tests = test_load_from_dir(dir);
-        list_foreach(tests, print_test, NULL);
-        list_destroy(tests, DESTROYFUNC(test_free));
+    if (opt_list_tests) {
+        list_tests(dir);
         return 0;
     }
 
@@ -164,28 +186,8 @@ int main(int argc, char *argv[])
         fclose(fh);
         free(path);
     }
-    if (args) {
-        char *path = get_filepath(dir, test_name, EXT_ARGS);
-        FILE *fh = fopen(path, "w");
-        if (fh == NULL) {
-            perror("Can not open arguments file");
-            exit(EXIT_FAILURE);
-        }
-        fprintf(fh, "%s\n", args);
-        free(path);
-        fclose(fh);
-    }
-    if (retval) {
-        char *path = get_filepath(dir, test_name, EXT_RETVAL);
-        FILE *fh = fopen(path, "w");
-        if (fh == NULL) {
-            perror("Can not open exit code file");
-            exit(EXIT_FAILURE);
-        }
-        fprintf(fh, "%s\n", retval);
-        free(path);
-        fclose(fh);
-    }
+    if (args)   print_to_file(dir, test_name, EXT_ARGS, args, "arguments");
+    if (retval) print_to_file(dir, test_name, EXT_RETVAL, retval, "exit code");
 
     return 0;
 }
