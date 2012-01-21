@@ -7,4 +7,5 @@ stest_SOURCES = stest.c \
 gen_test_SOURCES = gen-test.c \
 		   genutils.c \
 		   utils.c \
-		   list.c
+		   list.c \
+		   test.c

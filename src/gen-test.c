@@ -2,10 +2,23 @@
 
 #include "genutils.h"
 #include "utils.h"
+#include "test.h"
 
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+static void
+print_test(void *t, void *data)
+{
+    Test *test = (Test*) t;
+    printf("%-30s (%c%c:%c%c%c)\n", test->name,
+            FLAG_SET(test->parts, TEST_INPUT)   ? 'I' : ' ',
+            FLAG_SET(test->parts, TEST_ARGS)    ? 'A' : ' ',
+            FLAG_SET(test->parts, TEST_OUTPUT)  ? 'O' : ' ',
+            FLAG_SET(test->parts, TEST_ERRORS)  ? 'E' : ' ',
+            FLAG_SET(test->parts, TEST_RETVAL)  ? 'R' : ' ');
+}
 
 static void
 copy_from_to(FILE *from, FILE *to)
@@ -18,7 +31,7 @@ copy_from_to(FILE *from, FILE *to)
     } while (len == 1024);
 }
 
-#define OPTSTRING "ioer:a:hV"
+#define OPTSTRING "ioer:a:lhV"
 
 static void help()
 {
@@ -36,6 +49,7 @@ static const struct option long_options[] = {
     { "errors",     required_argument,  NULL, 0   },
     { "retval",     required_argument,  NULL, 'r' },
     { "args",       required_argument,  NULL, 'a' },
+    { "list",       no_argument,        NULL, 'l' },
     { "help",       no_argument,        NULL, 'h' },
     { "version",    no_argument,        NULL, 'V' },
     { 0, 0, 0, 0 }
@@ -47,7 +61,7 @@ static const char *exts[] = { EXT_INPUT, EXT_OUTPUT, EXT_ERRORS };
 int main(int argc, char *argv[])
 {
     char c;
-    int i;
+    int i, list_tests = 0;
     char *dir = "tests";
     char buffer[128], test_name[128];
     char *files[] = { NULL, NULL, NULL };
@@ -79,6 +93,9 @@ int main(int argc, char *argv[])
             args = optarg;
             break;
 
+        case 'l':
+            list_tests = 1;
+            break;
         case 'h':
             help();
             return 0;
@@ -92,6 +109,13 @@ int main(int argc, char *argv[])
     }
     if (optind < argc) {
         dir = argv[optind];
+    }
+
+    if (list_tests) {
+        List *tests = test_load_from_dir(dir);
+        list_foreach(tests, print_test, NULL);
+        list_destroy(tests, DESTROYFUNC(test_free));
+        return 0;
     }
 
     for (i = 0; i < 3; i++) {
