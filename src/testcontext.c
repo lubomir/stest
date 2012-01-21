@@ -200,7 +200,6 @@ test_context_analyze_test_run(TestContext *tc,
         tc->check_failed += test_context_check_output_file(tc, test,
                 err_file, EXT_ERRORS);
     }
-    if (!TC_IS_QUIET(tc)) putchar(' ');
     unlink(out_file);
     unlink(err_file);
 }
