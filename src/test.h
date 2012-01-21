@@ -32,7 +32,7 @@ void test_free(Test *test);
 /**
  * Open file descriptor with input for given test. If test does not specify
  * any input, /dev/null is opened and passed. It is responsibility of caller
- * to close this descriptor.
+ * to close this descriptor. On failure this function returns -1.
  *
  * @param test  test
  * @return file descriptor with new standard input

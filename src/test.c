@@ -70,10 +70,6 @@ int test_get_input_fd(Test *test)
         fd = open(input_file, O_RDONLY);
         free(input_file);
     }
-    if (fd < 0) {
-        perror("open");
-        exit(EXIT_FAILURE);
-    }
     return fd;
 }
 
@@ -105,7 +101,6 @@ char ** test_get_args(Test *test, size_t *count)
     }
     args = parse_args(line, count);
 
-    printf("%zu\n", *count);
     free(line);
 out2:
     fclose(fh);

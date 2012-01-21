@@ -4,6 +4,5 @@
 * create a tool to simplify creating tests
 * test program via custom command (*.cmd)
 * enable execution of a script before and after test (*.pre, *.post)
-* handle bad arguments better - skip only that test
 
 * allow building without tests

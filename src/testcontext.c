@@ -18,7 +18,8 @@ struct test_context_t {
     unsigned int test_num;
     unsigned int check_num;
     unsigned int check_failed;
-    unsigned int crashes;
+    unsigned int crashed;
+    unsigned int skipped;
     VerbosityMode verbose;
 };
 
@@ -182,7 +183,7 @@ test_context_analyze_test_run(TestContext *tc,
 {
     tc->test_num++;
     if (!WIFEXITED(status)) {
-        tc->crashes++;
+        tc->crashed++;
         if (!TC_IS_QUIET(tc)) print_color(RED, "C");
         oqueue_pushf(tc->logs, "Crash in %s%s%s: signal %d\n\n",
                 BOLD, test->name, NORMAL, WTERMSIG(status));
@@ -203,16 +204,16 @@ test_context_analyze_test_run(TestContext *tc,
         tc->check_failed += test_context_check_output_file(tc, test,
                 err_file, EXT_ERRORS);
     }
-    unlink(out_file);
-    unlink(err_file);
 }
 
 /**
  * Create temporary files for stdout and stderr, open them and then return
  * their file descriptors. The (char *) arguments will be modified and
  * therefore can not point to string constant.
+ *
+ * @return whether files were opened
  */
-static void
+static int
 test_context_prepare_outfiles(char *out_file,
                               int *out_fd,
                               char *err_file,
@@ -220,10 +221,7 @@ test_context_prepare_outfiles(char *out_file,
 {
     *out_fd = mkstemp(out_file);
     *err_fd = mkstemp(err_file);
-    if (*err_fd < 0 || *out_fd < 0) {
-        perror("Can not create temporary file");
-        exit(EXIT_FAILURE);
-    }
+    return *err_fd > 0 && *out_fd > 0;
 }
 
 /**
@@ -233,7 +231,7 @@ test_context_prepare_outfiles(char *out_file,
  *
  * @param tc    test context
  * @param t     test from which to retrieve arguments
- * @return NULL terminated array of strings
+ * @return NULL-terminated array of strings or NULL on failure
  */
 static char **
 test_context_get_args(TestContext *tc, Test *t)
@@ -243,13 +241,27 @@ test_context_get_args(TestContext *tc, Test *t)
 
     args = test_get_args(t, &count);
     if (args == NULL) {
-        fprintf(stderr, "Can not read arguments\n");
-        exit(EXIT_FAILURE);
+        return NULL;
     }
     args = realloc(args, (count + 1) * sizeof(char *));
     memmove(args+1, args, count * sizeof(char *));
     args[0] = get_command_name(tc->cmd);
     return args;
+}
+
+/**
+ * Display information about skipped test and increase counter.
+ *
+ * @param tc    test context
+ * @param t     test
+ * @param msg   detailed message
+ */
+static void
+test_context_skip(TestContext *tc, Test *t, const char *msg)
+{
+    oqueue_pushf(tc->logs, "Skipping test %s%s%s: %s.\n",
+            BOLD, t->name, NORMAL, msg);
+    tc->skipped++;
 }
 
 /**
@@ -268,9 +280,18 @@ static void test_context_run_test(Test *t, TestContext *tc)
     char **args;
     static char *env[] = { "MALLOC_CHECK_=2", NULL };
 
-    test_context_prepare_outfiles(out_file, &out_fd, err_file, &err_fd);
-    in_fd = test_get_input_fd(t);
-    args = test_context_get_args(tc, t);
+    if (!test_context_prepare_outfiles(out_file, &out_fd, err_file, &err_fd)) {
+        test_context_skip(tc, t, "can not open temporary files");
+        goto out;
+    }
+    if ((in_fd = test_get_input_fd(t)) < 0) {
+        test_context_skip(tc, t, "can not open input file");
+        goto out;
+    }
+    if ((args = test_context_get_args(tc, t)) == NULL) {
+        test_context_skip(tc, t, "can not read arguments");
+        goto out;
+    }
 
     child = fork();
     if (child == -1) {
@@ -295,6 +316,9 @@ static void test_context_run_test(Test *t, TestContext *tc)
     wait(&status);
 
     test_context_analyze_test_run(tc, t, out_file, err_file, status);
+out:
+    unlink(out_file);
+    unlink(err_file);
 }
 
 unsigned int
@@ -311,9 +335,10 @@ test_context_run_tests(TestContext *tc, List *tests, VerbosityMode verbose)
     if (!TC_IS_QUIET(tc)) {
         printf("\n\n");
         oqueue_flush(tc->logs, stdout);
-        printf("\n%u tests, %u checks, %u failed, %d crashes (%ld.%03ld seconds)\n",
-                tc->test_num, tc->check_num, tc->check_failed, tc->crashes,
-                res.tv_sec, res.tv_usec / 1000);
+        printf("\n%u tests, %d crashes, %d skipped, %u checks, %u failed"
+               " (%ld.%03ld seconds)\n",
+                tc->test_num, tc->crashed, tc->skipped, tc->check_num,
+                tc->check_failed, res.tv_sec, res.tv_usec / 1000);
     }
     return tc->check_failed;
 }
