@@ -18,16 +18,14 @@ struct test_context_t {
     unsigned int test_num;
     unsigned int check_num;
     unsigned int check_failed;
+    unsigned int crashes;
     VerbosityMode verbose;
 };
 
 TestContext * test_context_new(const char *cmd, const char *dir)
 {
-    TestContext *tc = malloc(sizeof(TestContext));
+    TestContext *tc = calloc(sizeof(TestContext), 1);
     tc->cmd = strdup(cmd);
-    tc->test_num = 0;
-    tc->check_num = 0;
-    tc->check_failed = 0;
     tc->verbose = MODE_NORMAL;
     tc->dir = strdup(dir);
     tc->logs = oqueue_new();
@@ -184,7 +182,10 @@ test_context_analyze_test_run(TestContext *tc,
 {
     tc->test_num++;
     if (!WIFEXITED(status)) {
-        printf("Program crashed\n");
+        tc->crashes++;
+        if (!TC_IS_QUIET(tc)) print_color(RED, "C");
+        oqueue_pushf(tc->logs, "Crash in %s%s%s: signal %d\n\n",
+                BOLD, test->name, NORMAL, WTERMSIG(status));
         return;
     }
 
@@ -265,6 +266,7 @@ static void test_context_run_test(Test *t, TestContext *tc)
     pid_t child;
     int status;
     char **args;
+    static char *env[] = { "MALLOC_CHECK_=2", NULL };
 
     test_context_prepare_outfiles(out_file, &out_fd, err_file, &err_fd);
     in_fd = test_get_input_fd(t);
@@ -278,7 +280,7 @@ static void test_context_run_test(Test *t, TestContext *tc)
         dup2(in_fd, STDIN_FILENO);
         dup2(out_fd, STDOUT_FILENO);
         dup2(err_fd, STDERR_FILENO);
-        execv(tc->cmd, args);
+        execve(tc->cmd, args, env);
         perror("exec");
         exit(EXIT_FAILURE);
     }                           /* Parent */
@@ -309,8 +311,8 @@ test_context_run_tests(TestContext *tc, List *tests, VerbosityMode verbose)
     if (!TC_IS_QUIET(tc)) {
         printf("\n\n");
         oqueue_flush(tc->logs, stdout);
-        printf("\n%u tests, %u checks, %u failed (%ld.%03ld seconds)\n",
-                tc->test_num, tc->check_num, tc->check_failed,
+        printf("\n%u tests, %u checks, %u failed, %d crashes (%ld.%03ld seconds)\n",
+                tc->test_num, tc->check_num, tc->check_failed, tc->crashes,
                 res.tv_sec, res.tv_usec / 1000);
     }
     return tc->check_failed;

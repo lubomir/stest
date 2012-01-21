@@ -1,6 +1,5 @@
 # TODO
 
-* correctly handle crash of the tested program
 * test program using valgrind
 * create a tool to simplify creating tests
 * test program via custom command (*.cmd)
