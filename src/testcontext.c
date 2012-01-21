@@ -185,8 +185,11 @@ test_context_analyze_test_run(TestContext *tc,
     if (!WIFEXITED(status)) {
         tc->crashed++;
         if (!TC_IS_QUIET(tc)) print_color(RED, "C");
-        oqueue_pushf(tc->logs, "Crash in %s%s%s: signal %d\n\n",
-                BOLD, test->name, NORMAL, WTERMSIG(status));
+        if (tc->verbose == MODE_VERBOSE) {
+            oqueue_pushf(tc->logs, "Crash in %s%s%s: %s (%d)\n\n",
+                    BOLD, test->name, NORMAL, strsignal(WTERMSIG(status)),
+                    WTERMSIG(status));
+        }
         return;
     }
 
@@ -259,8 +262,11 @@ test_context_get_args(TestContext *tc, Test *t)
 static void
 test_context_skip(TestContext *tc, Test *t, const char *msg)
 {
-    oqueue_pushf(tc->logs, "Skipping test %s%s%s: %s.\n",
-            BOLD, t->name, NORMAL, msg);
+    print_color(YELLOW, "S");
+    if (tc->verbose == MODE_VERBOSE) {
+        oqueue_pushf(tc->logs, "Skipping test %s%s%s: %s.\n\n",
+                BOLD, t->name, NORMAL, msg);
+    }
     tc->skipped++;
 }
 
@@ -344,7 +350,7 @@ test_context_run_tests(TestContext *tc, List *tests, VerbosityMode verbose)
     if (!TC_IS_QUIET(tc)) {
         printf("\n\n");
         oqueue_flush(tc->logs, stdout);
-        printf("\n%u tests, %d crashes, %d skipped, %u checks, %u failed"
+        printf("%u tests, %d crashes, %d skipped, %u checks, %u failed"
                " (%ld.%03ld seconds)\n",
                 tc->test_num, tc->crashed, tc->skipped, tc->check_num,
                 tc->check_failed, res.tv_sec, res.tv_usec / 1000);
