@@ -156,9 +156,10 @@ test_context_check_output_file(TestContext *tc,
             /* Verbose means copying diff */
             oqueue_push(tc->logs, " - diff follows:\n");
             oqueue_copy_from_fd(tc->logs, mypipe[PIPE_READ]);
+            oqueue_push(tc->logs, "\n");
         } else {                /* Otherwise only print how big the diff is */
             line_num = count_lines_on_fd(mypipe[PIPE_READ]);
-            oqueue_pushf(tc->logs, " - diff has %zu lines\n", line_num - 2);
+            oqueue_pushf(tc->logs, " - diff has %zu lines\n\n", line_num - 2);
         }
     }
     close(mypipe[PIPE_READ]);
