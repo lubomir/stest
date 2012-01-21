@@ -1,6 +1,5 @@
 # TODO
 
-* create a tool to simplify creating tests
 * test program via custom command (*.cmd)
 * enable execution of a script before and after test (*.pre, *.post)
 
