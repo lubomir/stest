@@ -1,6 +1,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/time.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -296,15 +297,20 @@ static void test_context_run_test(Test *t, TestContext *tc)
 unsigned int
 test_context_run_tests(TestContext *tc, List *tests, VerbosityMode verbose)
 {
+    struct timeval ta, tb, res;
     tc->verbose = verbose;
 
+    gettimeofday(&ta, NULL);
     list_foreach(tests, CBFUNC(test_context_run_test), tc);
+    gettimeofday(&tb, NULL);
+    timersub(&tb, &ta, &res);
 
     if (!TC_IS_QUIET(tc)) {
         printf("\n\n");
         oqueue_flush(tc->logs, stdout);
-        printf("\nRun %u tests, %u checks, %u failed\n",
-                tc->test_num, tc->check_num, tc->check_failed);
+        printf("\n%u tests, %u checks, %u failed (%ld.%03ld seconds)\n",
+                tc->test_num, tc->check_num, tc->check_failed,
+                res.tv_sec, res.tv_usec / 1000);
     }
     return tc->check_failed;
 }
