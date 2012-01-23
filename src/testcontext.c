@@ -368,13 +368,28 @@ test_context_analyze_memory(TestContext *tc, Test *t, char *file)
 
     tc->check_num++;
     if (errors == 0) {
-        print_color(GREEN, ".");
+        if (!TC_IS_QUIET(tc)) print_color(GREEN, ".");
     } else {
-        print_color(YELLOW, "M");
         tc->check_failed++;
-        oqueue_pushf(tc->logs, "Test %s%s%s failed:\ndetected %d memory %s\n\n",
-                BOLD, t->name, NORMAL, errors,
-                errors > 1 ? names[1] : names[0]);
+        if (!TC_IS_QUIET(tc)) {
+            print_color(YELLOW, "M");
+            oqueue_pushf(tc->logs, "Test %s%s%s failed:\ndetected %d memory %s\n",
+                    BOLD, t->name, NORMAL, errors,
+                    errors > 1 ? names[1] : names[0]);
+            if (tc->verbose == MODE_VERBOSE) {
+                char *line = NULL;
+                size_t len = 0, i, pid, size;
+                fseek(fh, 0, SEEK_SET);
+                for (i = 0; i < 5; i++) getline(&line, &len, fh);
+                pid = getline(&line, &len, fh) - 1;
+                while (strcmp("HEAP SUMMARY:\n", line + pid)) {
+                    getline(&line, &len, fh);
+                    oqueue_push(tc->logs, line + pid);
+                }
+            } else {
+                oqueue_push(tc->logs, "\n");
+            }
+        }
     }
 
     fclose(fh);

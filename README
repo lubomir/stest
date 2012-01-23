@@ -5,7 +5,6 @@
 * enable execution of a script before and after test (*.pre, *.post)
 
 * allow building without tests
-* add more details from valgrind
 * remove duplicities in code
     * printing bold test name
     * running command
