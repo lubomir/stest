@@ -181,6 +181,41 @@ test_context_check_output_file(TestContext *tc,
     return res;
 }
 
+static void
+test_context_analyze_memory(TestContext *tc, Test *t, char *file)
+{
+    static const char *names[] = { "error", "errors" };
+    int errors, contexts;
+    FILE *fh = fopen(file, "r");
+    if (!get_num_errors(fh, &errors, &contexts)) {
+        // log failure to parse
+        goto out;
+    }
+
+    tc->check_num++;
+    if (errors == 0) {
+        test_context_print_color(tc, GREEN, ".");
+    } else {
+        tc->check_failed++;
+        test_context_print_color(tc, YELLOW, "M");
+        if (TC_IS_QUIET(tc)) goto out;
+        oqueue_pushf(tc->logs, "Test %s failed:\ndetected %d memory %s in %d contexts\n",
+                str_to_bold(t->name), errors,
+                errors > 1 ? names[1] : names[0],
+                contexts);
+        if (tc->verbose == MODE_VERBOSE) {
+            oqueue_copy_from_valgrind(tc->logs, fh, contexts);
+        } else {
+            oqueue_push(tc->logs, "\n");
+        }
+    }
+
+out:
+    if (fh) fclose(fh);
+    unlink(file);
+    free(file);
+}
+
 /**
  * Check if a test should be performed and optionally perform it. Please note
  * that checking function is only called if the test should be performed.
@@ -206,6 +241,7 @@ test_context_check_output_file(TestContext *tc,
  * @param test  test run
  * @param out_file  where stdout was stored
  * @param err_file  where stderr was stored
+ * @param mem_file  where memory output was stored
  * @param status    status received from wait()
  */
 static void
@@ -213,6 +249,7 @@ test_context_analyze_test_run(TestContext *tc,
                               Test *test,
                               const char *out_file,
                               const char *err_file,
+                              char *mem_file,
                               int status)
 {
     tc->test_num++;
@@ -233,6 +270,8 @@ test_context_analyze_test_run(TestContext *tc,
             test_context_check_output_file, out_file, EXT_OUTPUT);
     test_context_check(tc, test, TEST_ERRORS,
             test_context_check_output_file, err_file, EXT_ERRORS);
+    if (tc->use_valgrind)
+        test_context_analyze_memory(tc, test, mem_file);
 }
 
 /**
@@ -351,41 +390,6 @@ test_context_prepare_for_valgrind(TestContext *tc, char ***_args)
     return file;
 }
 
-static void
-test_context_analyze_memory(TestContext *tc, Test *t, char *file)
-{
-    static const char *names[] = { "error", "errors" };
-    int errors, contexts;
-    FILE *fh = fopen(file, "r");
-    if (!get_num_errors(fh, &errors, &contexts)) {
-        // log failure to parse
-        goto out;
-    }
-
-    tc->check_num++;
-    if (errors == 0) {
-        test_context_print_color(tc, GREEN, ".");
-    } else {
-        tc->check_failed++;
-        test_context_print_color(tc, YELLOW, "M");
-        if (TC_IS_QUIET(tc)) goto out;
-        oqueue_pushf(tc->logs, "Test %s failed:\ndetected %d memory %s in %d contexts\n",
-                str_to_bold(t->name), errors,
-                errors > 1 ? names[1] : names[0],
-                contexts);
-        if (tc->verbose == MODE_VERBOSE) {
-            oqueue_copy_from_valgrind(tc->logs, fh, contexts);
-        } else {
-            oqueue_push(tc->logs, "\n");
-        }
-    }
-
-out:
-    if (fh) fclose(fh);
-    unlink(file);
-    free(file);
-}
-
 /**
  * Run a test in given context and analyze the results.
  *
@@ -399,7 +403,7 @@ static void test_context_run_test(Test *t, TestContext *tc)
     char err_file[] = "/tmp/stest-stderr-XXXXXX";
     pid_t child;
     int status;
-    char **args, *file;
+    char **args, *mem_file;
 
     if (!test_context_prepare_outfiles(out_file, &out_fd, err_file, &err_fd)) {
         test_context_skip(tc, t, "can not open temporary files");
@@ -415,7 +419,7 @@ static void test_context_run_test(Test *t, TestContext *tc)
     }
 
     if (tc->use_valgrind) {
-        file = test_context_prepare_for_valgrind(tc, &args);
+        mem_file = test_context_prepare_for_valgrind(tc, &args);
     }
     test_context_execute_test(tc, t, in_fd, out_fd, err_fd, args);
 
@@ -425,10 +429,7 @@ static void test_context_run_test(Test *t, TestContext *tc)
 
     wait(&status);
 
-    test_context_analyze_test_run(tc, t, out_file, err_file, status);
-    if (tc->use_valgrind) {
-        test_context_analyze_memory(tc, t, file);
-    }
+    test_context_analyze_test_run(tc, t, out_file, err_file, mem_file, status);
 out:
     unlink(out_file);
     unlink(err_file);
