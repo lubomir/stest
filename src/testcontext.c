@@ -87,7 +87,7 @@ test_context_handle_result(TestContext *tc,
     va_list args;
     va_start(args, fmt);
     test_context_print_color(tc, RED, "F");
-    oqueue_pushf(tc->logs, "Test %s%s%s failed:\n", BOLD, test->name, NORMAL);
+    oqueue_pushf(tc->logs, "Test %s failed:\n", str_to_bold(test->name));
     oqueue_pushvf(tc->logs, fmt, args);
     return 1;
 }
@@ -220,8 +220,8 @@ test_context_analyze_test_run(TestContext *tc,
         tc->crashed++;
         test_context_print_color(tc, RED, "C");
         if (tc->verbose == MODE_VERBOSE) {
-            oqueue_pushf(tc->logs, "Crash in %s%s%s: %s (%d)\n\n",
-                    BOLD, test->name, NORMAL, strsignal(WTERMSIG(status)),
+            oqueue_pushf(tc->logs, "Crash in %s: %s (%d)\n\n",
+                    str_to_bold(test->name), strsignal(WTERMSIG(status)),
                     WTERMSIG(status));
         }
         return;
@@ -290,8 +290,8 @@ test_context_skip(TestContext *tc, Test *t, const char *msg)
 {
     test_context_print_color(tc, YELLOW, "S");
     if (tc->verbose == MODE_VERBOSE) {
-        oqueue_pushf(tc->logs, "Skipping test %s%s%s: %s.\n\n",
-                BOLD, t->name, NORMAL, msg);
+        oqueue_pushf(tc->logs, "Skipping test %s: %s.\n\n",
+                str_to_bold(t->name), msg);
     }
     tc->skipped++;
 }
@@ -369,8 +369,8 @@ test_context_analyze_memory(TestContext *tc, Test *t, char *file)
         tc->check_failed++;
         test_context_print_color(tc, YELLOW, "M");
         if (TC_IS_QUIET(tc)) goto out;
-        oqueue_pushf(tc->logs, "Test %s%s%s failed:\ndetected %d memory %s in %d contexts\n",
-                BOLD, t->name, NORMAL, errors,
+        oqueue_pushf(tc->logs, "Test %s failed:\ndetected %d memory %s in %d contexts\n",
+                str_to_bold(t->name), errors,
                 errors > 1 ? names[1] : names[0],
                 contexts);
         if (tc->verbose == MODE_VERBOSE) {

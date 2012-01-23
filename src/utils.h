@@ -184,4 +184,13 @@ char * get_command_name(const char *cmdline);
  */
 int get_num_errors(FILE *fh, int *errors, int *contexts);
 
+/**
+ * Make the string bold. The returned pointer points to static memory and
+ * should no be freed.
+ *
+ * @param str   string to become bold
+ * @return modified string
+ */
+char * str_to_bold(const char *str);
+
 #endif /* end of include guard: UTILS_H */

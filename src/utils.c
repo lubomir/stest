@@ -199,3 +199,11 @@ int get_num_errors(FILE *fh, int *errors, int *contexts)
     fseek(fh, 3, SEEK_CUR);
     return fscanf(fh, " %d errors from %d", errors, contexts) == 2;
 }
+
+#define MAXLEN 512
+char * str_to_bold(const char *str)
+{
+    static char array[MAXLEN];
+    snprintf(array, MAXLEN, "%s%s%s", BOLD, str, NORMAL);
+    return array;
+}

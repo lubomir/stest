@@ -5,7 +5,5 @@
 * enable execution of a script before and after test (*.pre, *.post)
 
 * allow building without tests
-* remove duplicities in code
-    * printing bold test name
 * only print one header for one failed test
 * proper plurals: contexts, lines
