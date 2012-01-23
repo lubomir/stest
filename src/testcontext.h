@@ -18,9 +18,10 @@ typedef struct test_context_t TestContext;
  *
  * @param cmd   command to be tested
  * @param dir   directory where tests are stored
+ * @param mem   whether to check for memory errors
  * @return      new TestContext
  */
-TestContext * test_context_new(const char *cmd, const char *dir);
+TestContext * test_context_new(const char *cmd, const char *dir, int mem);
 
 /**
  * Free memory used by TestContext.

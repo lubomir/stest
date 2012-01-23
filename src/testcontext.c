@@ -14,6 +14,7 @@
 struct test_context_t {
     char *cmd;
     char *dir;
+    int use_valgrind;
     OQueue *logs;
     unsigned int test_num;
     unsigned int check_num;
@@ -23,13 +24,14 @@ struct test_context_t {
     VerbosityMode verbose;
 };
 
-TestContext * test_context_new(const char *cmd, const char *dir)
+TestContext * test_context_new(const char *cmd, const char *dir, int mem)
 {
     TestContext *tc = calloc(sizeof(TestContext), 1);
     tc->cmd = strdup(cmd);
     tc->verbose = MODE_NORMAL;
     tc->dir = strdup(dir);
     tc->logs = oqueue_new();
+    tc->use_valgrind = mem;
     return tc;
 }
 
@@ -393,7 +395,7 @@ static void test_context_run_test(Test *t, TestContext *tc)
     char err_file[] = "/tmp/stest-stderr-XXXXXX";
     pid_t child;
     int status;
-    char **args;
+    char **args, *file;
 
     if (!test_context_prepare_outfiles(out_file, &out_fd, err_file, &err_fd)) {
         test_context_skip(tc, t, "can not open temporary files");
@@ -408,8 +410,11 @@ static void test_context_run_test(Test *t, TestContext *tc)
         goto out;
     }
 
-    //test_context_execute_test(tc, t, in_fd, out_fd, err_fd, args);
-    char *file = test_context_execute_test_with_valgrind(tc, t, in_fd, out_fd, err_fd, args);
+    if (tc->use_valgrind) {
+        file = test_context_execute_test_with_valgrind(tc, t, in_fd, out_fd, err_fd, args);
+    } else {
+        test_context_execute_test(tc, t, in_fd, out_fd, err_fd, args);
+    }
 
     for (i = 0; args[i] != NULL; i++)
         free(args[i]);
@@ -418,7 +423,9 @@ static void test_context_run_test(Test *t, TestContext *tc)
     wait(&status);
 
     test_context_analyze_test_run(tc, t, out_file, err_file, status);
-    test_context_analyze_memory(tc, t, file);
+    if (tc->use_valgrind) {
+        test_context_analyze_memory(tc, t, file);
+    }
 out:
     unlink(out_file);
     unlink(err_file);

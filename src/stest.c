@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    TestContext *tc = test_context_new(cmd, dir);
+    TestContext *tc = test_context_new(cmd, dir, use_valgrind);
     failed_checks = test_context_run_tests(tc, tests, verbosity_level);
     list_destroy(tests, DESTROYFUNC(test_free));
     test_context_free(tc);
