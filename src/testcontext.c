@@ -60,8 +60,8 @@ void test_context_free(TestContext *tc)
  */
 static void test_context_print_color(TestContext *tc, char *color, char *str)
 {
-    if (TC_IS_QUIET(tc)) return;
-    print_color(color, str);
+    if (!TC_IS_QUIET(tc))
+        print_color(color, str);
 }
 
 /**
