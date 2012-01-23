@@ -304,6 +304,82 @@ test_context_execute_test(TestContext *tc, Test *t,
     close(err_fd);
 }
 
+static char *
+test_context_execute_test_with_valgrind(TestContext *tc, Test *t,
+        int in_fd, int out_fd, int err_fd, char **args)
+{
+    int child;
+    char **realargs;
+    int len = 5, i;
+    for (i = 0; args[i] != NULL; i++) len++;
+    realargs = calloc(sizeof(char *), len);
+    realargs[0] = "valgrind";
+    realargs[1] = "--tool=memcheck";
+    realargs[2] = calloc(sizeof(char), 128);
+    realargs[3] = tc->cmd;
+    for (i = 1; args[i] != NULL; i++) realargs[i+2] = args[i];
+    char *file = calloc(sizeof(char), 30);
+    strcpy(file, "/tmp/stest-memory-XXXXXX");
+    int log_fd = mkstemp(file);
+    if (log_fd < 0) {
+        perror("mkstemp");
+        exit(EXIT_FAILURE);
+    }
+    close(log_fd);
+
+    snprintf(realargs[2], 128, "--log-file=%s", file);
+
+    child = fork();
+    if (child == -1) {
+        perror("fork");
+        exit(EXIT_FAILURE);
+    } else if (child == 0) {
+        dup2(in_fd, STDIN_FILENO);
+        dup2(out_fd, STDOUT_FILENO);
+        dup2(err_fd, STDERR_FILENO);
+        execvp("valgrind", realargs);
+        perror("exec");
+        exit(EXIT_FAILURE);
+    }
+    free(realargs[2]);
+    free(realargs);
+    close(in_fd);
+    close(out_fd);
+    close(err_fd);
+    return file;
+}
+
+static void
+test_context_analyze_memory(TestContext *tc, Test *t, char *file)
+{
+    static const char *names[] = { "error", "errors" };
+    char *line, c;
+    int errors = 0;
+    FILE *fh = fopen(file, "r");
+    fseek(fh, -10, SEEK_END);
+    do {
+        c = fgetc(fh);
+        fseek(fh, -2, SEEK_CUR);
+    } while (c != 'Y');
+    fseek(fh, 3, SEEK_CUR);
+    fscanf(fh, " %d", &errors);
+
+    tc->check_num++;
+    if (errors == 0) {
+        print_color(GREEN, ".");
+    } else {
+        print_color(YELLOW, "M");
+        tc->check_failed++;
+        oqueue_pushf(tc->logs, "Test %s%s%s failed:\ndetected %d memory %s\n\n",
+                BOLD, t->name, NORMAL, errors,
+                errors > 1 ? names[1] : names[0]);
+    }
+
+    fclose(fh);
+    unlink(file);
+    free(file);
+}
+
 /**
  * Run a test in given context and analyze the results.
  *
@@ -332,7 +408,8 @@ static void test_context_run_test(Test *t, TestContext *tc)
         goto out;
     }
 
-    test_context_execute_test(tc, t, in_fd, out_fd, err_fd, args);
+    //test_context_execute_test(tc, t, in_fd, out_fd, err_fd, args);
+    char *file = test_context_execute_test_with_valgrind(tc, t, in_fd, out_fd, err_fd, args);
 
     for (i = 0; args[i] != NULL; i++)
         free(args[i]);
@@ -341,6 +418,7 @@ static void test_context_run_test(Test *t, TestContext *tc)
     wait(&status);
 
     test_context_analyze_test_run(tc, t, out_file, err_file, status);
+    test_context_analyze_memory(tc, t, file);
 out:
     unlink(out_file);
     unlink(err_file);
