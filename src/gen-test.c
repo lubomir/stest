@@ -195,15 +195,13 @@ int main(int argc, char *argv[])
 
     for (i = 0; i < 3; i++) {
         char *path = get_filepath(dir, test_name, exts[i]);
-        FILE *fh = fopen(path, "w");
-        if (fh == NULL) {
+        FILE *fh, *from;
+        if ((fh = fopen(path, "w")) == NULL) {
             perror("Can not open test file");
             exit(EXIT_FAILURE);
         }
-        FILE *from;
         if (files[i]) {
-            from = fopen(files[i], "r");
-            if (from == NULL) {
+            if ((from = fopen(files[i], "r")) == NULL) {
                 perror("Can not open input file");
                 exit(EXIT_FAILURE);
             }
