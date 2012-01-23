@@ -216,6 +216,13 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
+    if (!(args || retval ||
+                files[0] || files[1] || files[2] ||
+                from_user[0] || from_user[1] || from_user[2])) {
+        printf("No action requested... exiting\n");
+        return EXIT_SUCCESS;
+    }
+
     int test_no = get_test_num(dir) + 1;
     printf("Test name: ");
     fflush(stdout);
