@@ -51,6 +51,20 @@ void test_context_free(TestContext *tc)
 #define TC_IS_QUIET(tc) (tc->verbose == MODE_QUIET)
 
 /**
+ * Wrapper around print_color() utility function that only prints if the test
+ * context is not set to be quiet.
+ *
+ * @param tc    test context
+ * @param color requested color
+ * @param str   string to be printed
+ */
+static void test_context_print_color(TestContext *tc, char *color, char *str)
+{
+    if (TC_IS_QUIET(tc)) return;
+    print_color(color, str);
+}
+
+/**
  * Check if condition holds and print appropriate message to stdout.
  *
  * @param tc    test context
@@ -67,12 +81,12 @@ test_context_handle_result(TestContext *tc,
                            ...)
 {
     if (cond) {
-        if (!TC_IS_QUIET(tc)) print_color(GREEN, ".");
+        test_context_print_color(tc, GREEN, ".");
         return 0;
     }
     va_list args;
     va_start(args, fmt);
-    if (!TC_IS_QUIET(tc)) print_color(RED, "F");
+    test_context_print_color(tc, RED, "F");
     oqueue_pushf(tc->logs, "Test %s%s%s failed:\n", BOLD, test->name, NORMAL);
     oqueue_pushvf(tc->logs, fmt, args);
     return 1;
@@ -204,7 +218,7 @@ test_context_analyze_test_run(TestContext *tc,
     tc->test_num++;
     if (!WIFEXITED(status)) {
         tc->crashed++;
-        if (!TC_IS_QUIET(tc)) print_color(RED, "C");
+        test_context_print_color(tc, RED, "C");
         if (tc->verbose == MODE_VERBOSE) {
             oqueue_pushf(tc->logs, "Crash in %s%s%s: %s (%d)\n\n",
                     BOLD, test->name, NORMAL, strsignal(WTERMSIG(status)),
@@ -274,7 +288,7 @@ test_context_get_args(TestContext *tc, Test *t)
 static void
 test_context_skip(TestContext *tc, Test *t, const char *msg)
 {
-    print_color(YELLOW, "S");
+    test_context_print_color(tc, YELLOW, "S");
     if (tc->verbose == MODE_VERBOSE) {
         oqueue_pushf(tc->logs, "Skipping test %s%s%s: %s.\n\n",
                 BOLD, t->name, NORMAL, msg);
@@ -368,11 +382,11 @@ test_context_analyze_memory(TestContext *tc, Test *t, char *file)
 
     tc->check_num++;
     if (errors == 0) {
-        if (!TC_IS_QUIET(tc)) print_color(GREEN, ".");
+        test_context_print_color(tc, GREEN, ".");
     } else {
         tc->check_failed++;
         if (!TC_IS_QUIET(tc)) {
-            print_color(YELLOW, "M");
+            test_context_print_color(tc, YELLOW, "M");
             oqueue_pushf(tc->logs, "Test %s%s%s failed:\ndetected %d memory %s\n",
                     BOLD, t->name, NORMAL, errors,
                     errors > 1 ? names[1] : names[0]);
