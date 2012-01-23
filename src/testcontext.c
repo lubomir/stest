@@ -402,8 +402,8 @@ static void test_context_run_test(Test *t, TestContext *tc)
     char out_file[] = "/tmp/stest-stdout-XXXXXX";
     char err_file[] = "/tmp/stest-stderr-XXXXXX";
     pid_t child;
-    int status;
-    char **args, *mem_file;
+    int status = 0;
+    char **args, *mem_file = NULL;
 
     if (!test_context_prepare_outfiles(out_file, &out_fd, err_file, &err_fd)) {
         test_context_skip(tc, t, "can not open temporary files");

@@ -68,10 +68,11 @@ test_get_test_part_bad()
 {
     cut_assert_equal_uint(TEST_UNKNOWN, get_test_part(NULL));
 
+    int i;
     static char *bad_ones[] = { "001_file.bad", "002_file.", "003_no_ext",
         "", NULL};
 
-    for (int i = 0; bad_ones[i] != NULL; i++) {
+    for (i = 0; bad_ones[i] != NULL; i++) {
         cut_assert_equal_uint(TEST_UNKNOWN, get_test_part(bad_ones[i]));
     }
 }
@@ -208,7 +209,7 @@ test_parse_args_empty()
     char *tests[] = { "", " ", "''", "\"\"", NULL };
     char *expected[] = { NULL };
     int i = 0;
-    size_t len;
+    size_t len = 0;
 
     while (tests[i] != NULL) {
         cut_assert_equal_string_array_with_free(expected,
@@ -279,7 +280,7 @@ test_parse_args_len()
     char **expected[] = { expected1, expected2, expected3, expected4 };
     char *tests[] = { "foo", "foo bar", "foo bar baz", "'foo bar'", NULL };
     size_t lengths[] = { 2, 3, 4, 2 };
-    size_t len;
+    size_t len = 0;
     int i;
 
     for (i = 0; tests[i] != NULL; i++) {
