@@ -380,12 +380,14 @@ test_context_prepare_for_valgrind(TestContext *tc, char ***_args)
 
     fd = mkstemp(file);
     if (fd < 0) {
-        perror("mkstemp");
-        exit(EXIT_FAILURE);
+        free(file);
+        file = NULL;
+        goto out;
     }
     close(fd);
 
     snprintf(args[3], 128, "--log-file=%s", file);
+out:
     *_args = args;
     return file;
 }
@@ -403,7 +405,7 @@ static void test_context_run_test(Test *t, TestContext *tc)
     char err_file[] = "/tmp/stest-stderr-XXXXXX";
     pid_t child;
     int status = 0;
-    char **args, *mem_file = NULL;
+    char **args = NULL, *mem_file = NULL;
 
     if (!test_context_prepare_outfiles(out_file, &out_fd, err_file, &err_fd)) {
         test_context_skip(tc, t, "can not open temporary files");
@@ -420,17 +422,23 @@ static void test_context_run_test(Test *t, TestContext *tc)
 
     if (tc->use_valgrind) {
         mem_file = test_context_prepare_for_valgrind(tc, &args);
+        if (!mem_file) {
+            test_context_skip(tc, t, "can not open memory output file");
+            goto out;
+        }
     }
     test_context_execute_test(tc, t, in_fd, out_fd, err_fd, args);
-
-    for (i = 0; args[i] != NULL; i++)
-        free(args[i]);
-    free(args);
 
     wait(&status);
 
     test_context_analyze_test_run(tc, t, out_file, err_file, mem_file, status);
 out:
+    if (args) {
+        for (i = 0; args[i] != NULL; i++)
+            free(args[i]);
+        free(args);
+    }
+
     unlink(out_file);
     unlink(err_file);
 }
