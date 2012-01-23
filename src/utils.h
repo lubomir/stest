@@ -4,6 +4,7 @@
 #include <config.h>
 
 #include <dirent.h>
+#include <stdio.h>
 
 /**
  * Compare two filenames based on leading digits.
@@ -171,5 +172,16 @@ char ** parse_args(const char *str, size_t *len);
  * @return command name
  */
 char * get_command_name(const char *cmdline);
+
+/**
+ * Parse Valgrind output and find out how many errors in how many context were
+ * found.
+ *
+ * @param fh    file handle to output
+ * @param errors    where to store number of errors
+ * @param contexts  where to store number of contexts
+ * @return 0 if parsing failed, non-negative integer on success.
+ */
+int get_num_errors(FILE *fh, int *errors, int *contexts);
 
 #endif /* end of include guard: UTILS_H */

@@ -73,4 +73,14 @@ void oqueue_flush(OQueue *q, FILE *fh);
  */
 void oqueue_copy_from_fd(OQueue *queue, int source);
 
+/**
+ * Copy error messages from valgrind output stored in file to output queue.
+ *
+ * @param queue where to store the messages
+ * @param fh    file handle to read from
+ * @param ctxs  how many error messages are there
+ */
+void oqueue_copy_from_valgrind(OQueue *queue, FILE *fh, int ctxs);
+
+
 #endif /* end of include guard: OUTPUTQUEUE_H */

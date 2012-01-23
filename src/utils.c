@@ -186,3 +186,16 @@ char * get_command_name(const char *cmdline)
     strcpy(cmd, slash + 1);
     return cmd;
 }
+
+int get_num_errors(FILE *fh, int *errors, int *contexts)
+{
+    char c;
+
+    fseek(fh, -40, SEEK_END);
+    do {
+        c = fgetc(fh);
+        fseek(fh, -2, SEEK_CUR);
+    } while (c != 'Y');
+    fseek(fh, 3, SEEK_CUR);
+    return fscanf(fh, " %d errors from %d", errors, contexts) == 2;
+}

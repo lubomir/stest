@@ -78,3 +78,27 @@ void oqueue_copy_from_fd(OQueue *dest, int source)
         oqueue_push(dest, buffer);
     }
 }
+
+void oqueue_copy_from_valgrind(OQueue *queue, FILE *fh, int contexts)
+{
+    char *line = NULL;
+    ssize_t size;
+    size_t len = 0, strip;
+    int i;
+
+    fseek(fh, 0, SEEK_SET);
+    for (i = 0; i < 5; i++) {   /* Strip leading header (5 lines) */
+        getline(&line, &len, fh);
+    }
+    strip = getline(&line, &len, fh);
+    for (i = 0; i < contexts; i++) {
+        do {
+            size = getline(&line, &len, fh);
+            if (size <= strip) break;
+            oqueue_push(queue, line + strip - 1);
+        } while (1);
+        oqueue_push(queue, "\n");
+    }
+
+    free(line);
+}

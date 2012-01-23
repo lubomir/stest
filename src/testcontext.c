@@ -369,44 +369,33 @@ static void
 test_context_analyze_memory(TestContext *tc, Test *t, char *file)
 {
     static const char *names[] = { "error", "errors" };
-    char *line, c;
-    int errors = 0;
+    int errors, contexts;
     FILE *fh = fopen(file, "r");
-    fseek(fh, -10, SEEK_END);
-    do {
-        c = fgetc(fh);
-        fseek(fh, -2, SEEK_CUR);
-    } while (c != 'Y');
-    fseek(fh, 3, SEEK_CUR);
-    fscanf(fh, " %d", &errors);
+    if (!get_num_errors(fh, &errors, &contexts)) {
+        // log failure to parse
+        goto out;
+    }
 
     tc->check_num++;
     if (errors == 0) {
         test_context_print_color(tc, GREEN, ".");
     } else {
         tc->check_failed++;
-        if (!TC_IS_QUIET(tc)) {
-            test_context_print_color(tc, YELLOW, "M");
-            oqueue_pushf(tc->logs, "Test %s%s%s failed:\ndetected %d memory %s\n",
-                    BOLD, t->name, NORMAL, errors,
-                    errors > 1 ? names[1] : names[0]);
-            if (tc->verbose == MODE_VERBOSE) {
-                char *line = NULL;
-                size_t len = 0, i, pid, size;
-                fseek(fh, 0, SEEK_SET);
-                for (i = 0; i < 5; i++) getline(&line, &len, fh);
-                pid = getline(&line, &len, fh) - 1;
-                while (strcmp("HEAP SUMMARY:\n", line + pid)) {
-                    getline(&line, &len, fh);
-                    oqueue_push(tc->logs, line + pid);
-                }
-            } else {
-                oqueue_push(tc->logs, "\n");
-            }
+        test_context_print_color(tc, YELLOW, "M");
+        if (TC_IS_QUIET(tc)) goto out;
+        oqueue_pushf(tc->logs, "Test %s%s%s failed:\ndetected %d memory %s in %d contexts\n",
+                BOLD, t->name, NORMAL, errors,
+                errors > 1 ? names[1] : names[0],
+                contexts);
+        if (tc->verbose == MODE_VERBOSE) {
+            oqueue_copy_from_valgrind(tc->logs, fh, contexts);
+        } else {
+            oqueue_push(tc->logs, "\n");
         }
     }
 
-    fclose(fh);
+out:
+    if (fh) fclose(fh);
     unlink(file);
     free(file);
 }
