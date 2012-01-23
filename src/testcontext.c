@@ -311,7 +311,7 @@ test_context_execute_test(TestContext *tc, Test *t,
         dup2(in_fd, STDIN_FILENO);
         dup2(out_fd, STDOUT_FILENO);
         dup2(err_fd, STDERR_FILENO);
-        execve(tc->cmd, args, env);
+        execve(args[0], args, env);
         perror("exec");
         exit(EXIT_FAILURE);
     }                           /* Parent */
@@ -321,47 +321,33 @@ test_context_execute_test(TestContext *tc, Test *t,
 }
 
 static char *
-test_context_execute_test_with_valgrind(TestContext *tc, Test *t,
-        int in_fd, int out_fd, int err_fd, char **args)
+test_context_prepare_for_valgrind(TestContext *tc, char ***_args)
 {
-    int child;
-    char **realargs;
-    int len = 5, i;
-    for (i = 0; args[i] != NULL; i++) len++;
-    realargs = calloc(sizeof(char *), len);
-    realargs[0] = "valgrind";
-    realargs[1] = "--tool=memcheck";
-    realargs[2] = calloc(sizeof(char), 128);
-    realargs[3] = tc->cmd;
-    for (i = 1; args[i] != NULL; i++) realargs[i+2] = args[i];
-    char *file = calloc(sizeof(char), 30);
-    strcpy(file, "/tmp/stest-memory-XXXXXX");
-    int log_fd = mkstemp(file);
-    if (log_fd < 0) {
+    char **args = *_args;
+    int len = 1, i, modify_pos, fd;
+    char *file = strdup("/tmp/stest-memory-XXXXXX");
+
+    free(args[0]);
+    for (i = 1; args[i] != NULL; i++)
+        len++;
+
+    args = realloc(args, (5 + len) * sizeof(char *));
+    memmove(args + 5, args + 1, len * sizeof(char *));
+    args[0] = strdup("/usr/bin/valgrind");
+    args[1] = strdup("--tool=memcheck");
+    args[2] = strdup("--leak-check=full");
+    args[3] = calloc(sizeof(char), 128);
+    args[4] = strdup(tc->cmd);
+
+    fd = mkstemp(file);
+    if (fd < 0) {
         perror("mkstemp");
         exit(EXIT_FAILURE);
     }
-    close(log_fd);
+    close(fd);
 
-    snprintf(realargs[2], 128, "--log-file=%s", file);
-
-    child = fork();
-    if (child == -1) {
-        perror("fork");
-        exit(EXIT_FAILURE);
-    } else if (child == 0) {
-        dup2(in_fd, STDIN_FILENO);
-        dup2(out_fd, STDOUT_FILENO);
-        dup2(err_fd, STDERR_FILENO);
-        execvp("valgrind", realargs);
-        perror("exec");
-        exit(EXIT_FAILURE);
-    }
-    free(realargs[2]);
-    free(realargs);
-    close(in_fd);
-    close(out_fd);
-    close(err_fd);
+    snprintf(args[3], 128, "--log-file=%s", file);
+    *_args = args;
     return file;
 }
 
@@ -429,10 +415,9 @@ static void test_context_run_test(Test *t, TestContext *tc)
     }
 
     if (tc->use_valgrind) {
-        file = test_context_execute_test_with_valgrind(tc, t, in_fd, out_fd, err_fd, args);
-    } else {
-        test_context_execute_test(tc, t, in_fd, out_fd, err_fd, args);
+        file = test_context_prepare_for_valgrind(tc, &args);
     }
+    test_context_execute_test(tc, t, in_fd, out_fd, err_fd, args);
 
     for (i = 0; args[i] != NULL; i++)
         free(args[i]);

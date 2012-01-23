@@ -7,6 +7,5 @@
 * allow building without tests
 * remove duplicities in code
     * printing bold test name
-    * running command
 * only print one header for one failed test
 * proper plurals: contexts, lines
