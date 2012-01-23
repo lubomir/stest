@@ -1,8 +1,32 @@
+# STest
+
+STest is a simple testing utility for checking output of command line programs.
+All tests are defined in many files. All files of one test have same base name
+and their extensions determine what the particular file tests. Default location
+for these files is a tests/ subdirectory.
+
+.in     gets passed to standard input
+.args   contains command line arguments
+.out    is expected on standard output
+.err    is expected on standard error output
+.ret    contains expected exit code
+
+Use the gen-test utility to easily generate these tests. Both gen-test and
+stest have some help available with --help option.
+
+# Requirements
+
+Build dependencies of stest are a C compiler, Cutter unit testing library and
+libtool. All these dependencies should be checked for by configure script.
+
+There are also runtime dependecies: diff and optionally Valgrind for checking
+memory errors.
+
 # TODO
 
-* test program via custom command (*.cmd)
-* enable execution of a script before and after test (*.pre, *.post)
+ + test program via custom command (.cmd)
+ + enable execution of a script before and after test (.pre, .post)
 
-* allow building without tests
-* only print one header for one failed test
-* proper plurals: contexts, lines
+ + allow building without tests
+ + only print one header for one failed test
+ + proper plurals in messages: contexts, lines
