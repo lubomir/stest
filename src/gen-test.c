@@ -97,6 +97,9 @@ check_consistency(int *from_user, char **files)
     return count;
 }
 
+/**
+ * Create file from specified origin or direct input.
+ */
 static void
 create_file(const char *dir, const char *name, const char *ext,
         const char *file, int from_user)
@@ -133,7 +136,25 @@ create_file(const char *dir, const char *name, const char *ext,
 
 static void help()
 {
-    printf("Help\n");
+    puts("SYNOPSIS");
+    puts("\tgen-test [ioeralhV] [TESTDIR]");
+
+    puts("\nOPTIONS");
+    puts("\t-h, --help\n\t\tdisplay this help\n");
+    puts("\t-l, --list\n\t\tlist all existing tests and their parts\n");
+    puts("\t-i\n\t\tload standard input from console\n");
+    puts("\t--input=FILE\n\t\tcopy standard input from FILE\n");
+    puts("\t-o\n\t\tload standard output from console\n");
+    puts("\t--output=FILE\n\t\tcopy standard output from FILE\n");
+    puts("\t-e\n\t\tload standard error output from console\n");
+    puts("\t--errors=FILE\n\t\tcopy standard error output from FILE\n");
+    puts("\t-a, --args=ARGS\n\t\tpass ARGS as command line options\n");
+    puts("\t-r, --retval=CODE\n\t\texpected program to exit with CODE\n");
+    puts("\t-V, --version\n\t\tdisplay version info\n");
+    puts("\tIf TESTDIR is not specified, use ./tests directory.");
+
+    puts("\nRETURN VALUE");
+    puts("\t0 is returned on success, 1 otherwise");
 }
 
 static void usage(const char *progname)
