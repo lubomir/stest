@@ -291,16 +291,3 @@ test_parse_args_len()
                 cut_message("Input -%s-", tests[i]));
     }
 }
-
-void
-test_get_command()
-{
-    int i;
-    char *cmd[] = { "./command", "command", "./dir/command", "/tmp/command",
-        "~user/bin/command", "~/bin/command", NULL };
-
-    for (i = 0; cmd[i] != NULL; i++) {
-        cut_assert_equal_string_with_free("command", get_command_name(cmd[i]),
-                    cut_message("Input -%s-", cmd[i]));
-    }
-}

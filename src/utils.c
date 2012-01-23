@@ -173,20 +173,6 @@ out:
     return NULL;
 }
 
-char * get_command_name(const char *cmdline)
-{
-    char *slash;
-    char *cmd;
-
-    slash = strrchr(cmdline, '/');
-    if (slash == NULL) {
-        return strdup(cmdline);
-    }
-    cmd = calloc(sizeof(char), strlen(slash));
-    strcpy(cmd, slash + 1);
-    return cmd;
-}
-
 int get_num_errors(FILE *fh, int *errors, int *contexts)
 {
     char c;

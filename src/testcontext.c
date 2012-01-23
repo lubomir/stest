@@ -313,7 +313,7 @@ test_context_get_args(TestContext *tc, Test *t)
     }
     args = realloc(args, (count + 1) * sizeof(char *));
     memmove(args+1, args, count * sizeof(char *));
-    args[0] = get_command_name(tc->cmd);
+    args[0] = strdup(tc->cmd);
     return args;
 }
 
@@ -366,17 +366,15 @@ test_context_prepare_for_valgrind(TestContext *tc, char ***_args)
     int len = 1, i, modify_pos, fd;
     char *file = strdup("/tmp/stest-memory-XXXXXX");
 
-    free(args[0]);
-    for (i = 1; args[i] != NULL; i++)
+    for (i = 0; args[i] != NULL; i++)
         len++;
 
-    args = realloc(args, (5 + len) * sizeof(char *));
-    memmove(args + 5, args + 1, len * sizeof(char *));
+    args = realloc(args, (4 + len) * sizeof(char *));
+    memmove(args + 4, args, len * sizeof(char *));
     args[0] = strdup("/usr/bin/valgrind");
     args[1] = strdup("--tool=memcheck");
     args[2] = strdup("--leak-check=full");
     args[3] = calloc(sizeof(char), 128);
-    args[4] = strdup(tc->cmd);
 
     fd = mkstemp(file);
     if (fd < 0) {
