@@ -8,7 +8,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static const char *stream_name[] = { "input", "output", "errors" };
 static const char *exts[] = { EXT_INPUT, EXT_OUTPUT, EXT_ERRORS };
 
 /**
@@ -90,12 +89,44 @@ check_consistency(int *from_user, char **files)
     for (i = 0; i < 3; i++) {
         if (files[i] != NULL && from_user[i]) {
             fprintf(stderr,
-                    "You can not load %s from console and file at the same time.\n",
-                    stream_name[i]);
+                    "You can not load std%s from console and file at the same time.\n",
+                    exts[i]);
             count++;
         }
     }
     return count;
+}
+
+static void
+create_file(const char *dir, const char *name, const char *ext,
+        const char *file, int from_user)
+{
+    char *path;
+    FILE *fh, *from;
+
+    if (!file && !from_user) return;
+
+    path = get_filepath(dir, name, ext);
+    if ((fh = fopen(path, "w")) == NULL) {
+        perror("Can not open test file");
+        exit(EXIT_FAILURE);
+    }
+    if (file) {
+        if ((from = fopen(file, "r")) == NULL) {
+            perror("Can not open input file");
+            exit(EXIT_FAILURE);
+        }
+    } else if (from_user) {
+        printf("Enter std%s:\n", ext);
+        from = stdin;
+    }
+
+    copy_from_to(from, fh);
+
+    if (file)
+        fclose(from);
+    fclose(fh);
+    free(path);
 }
 
 #define OPTSTRING "ioer:a:lhV"
@@ -194,30 +225,7 @@ int main(int argc, char *argv[])
     printf("Creating test %s in %s\n", test_name, dir);
 
     for (i = 0; i < 3; i++) {
-        char *path = get_filepath(dir, test_name, exts[i]);
-        FILE *fh, *from;
-        if ((fh = fopen(path, "w")) == NULL) {
-            perror("Can not open test file");
-            exit(EXIT_FAILURE);
-        }
-        if (files[i]) {
-            if ((from = fopen(files[i], "r")) == NULL) {
-                perror("Can not open input file");
-                exit(EXIT_FAILURE);
-            }
-        } else if (from_user[i]) {
-            printf("Enter %s:\n", stream_name[i]);
-            from = stdin;
-        } else {
-            continue;
-        }
-
-        copy_from_to(from, fh);
-        if (files[i]) {
-            fclose(from);
-        }
-        fclose(fh);
-        free(path);
+        create_file(dir, test_name, exts[i], files[i], from_user[i]);
     }
     if (args)   print_to_file(dir, test_name, EXT_ARGS, args, "arguments");
     if (retval) print_to_file(dir, test_name, EXT_RETVAL, retval, "exit code");
