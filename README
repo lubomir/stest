@@ -22,6 +22,15 @@ libtool. All these dependencies should be checked for by configure script.
 There are also runtime dependecies: diff and optionally Valgrind for checking
 memory errors.
 
+# Building
+
+In source directory, run
+
+    $ ./autogen.sh
+    $ ./configure
+    $ make
+    $ make install
+
 # TODO
 
  + test program via custom command (.cmd)

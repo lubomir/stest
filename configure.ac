@@ -4,7 +4,9 @@ AC_CONFIG_SRCDIR([src/stest.c])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_AUX_DIR([config])
 
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([foreign])
+AM_SILENT_RULES
+
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_LIBTOOL
