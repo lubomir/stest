@@ -11,8 +11,13 @@ AM_SILENT_RULES
 AC_PROG_CC
 AC_PROG_LIBTOOL
 
-# Checks for libraries.
-AC_CHECK_CUTTER
+AC_ARG_ENABLE([tests],
+              AS_HELP_STRING([--disable-tests], [disable building tests]))
+
+AS_IF([test "x$enable_tests" != "xno"], [
+      AC_CHECK_CUTTER
+      ])
+AM_CONDITIONAL([ENABLE_TESTS], [test "x$enable_tests" != "xno"])
 
 # Checks for header files.
 

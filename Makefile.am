@@ -1,3 +1,7 @@
 ACLOCAL_AMFLAGS = $$ACLOCAL_ARGS
 
-SUBDIRS = src test
+SUBDIRS = src
+
+if ENABLE_TESTS
+SUBDIRS += test
+endif

@@ -36,6 +36,5 @@ In source directory, run
  + test program via custom command (.cmd)
  + enable execution of a script before and after test (.pre, .post)
 
- + allow building without tests
  + only print one header for one failed test
  + proper plurals in messages: contexts, lines
