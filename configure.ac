@@ -4,7 +4,7 @@ AC_CONFIG_SRCDIR([src/stest.c])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_AUX_DIR([config])
 
-AM_INIT_AUTOMAKE([foreign])
+AM_INIT_AUTOMAKE([foreign subdir-objects])
 AM_SILENT_RULES
 
 # Checks for programs.
@@ -25,4 +25,4 @@ AM_CONDITIONAL([ENABLE_TESTS], [test "x$enable_tests" != "xno"])
 
 # Checks for library functions.
 
-AC_OUTPUT([Makefile src/Makefile test/Makefile])
+AC_OUTPUT([Makefile])

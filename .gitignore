@@ -13,11 +13,12 @@ libtool
 missing
 stamp-h1
 
-src/stest
-src/gen-test
-*/.deps
-*/.libs
+stest
+gen-test
 
+.dirstamp
+.deps
+.libs
 *.swp
 *.o
 *.la
