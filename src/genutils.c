@@ -35,8 +35,9 @@ int get_test_num(const char *dirpath)
     }
 
     while ((entry = readdir(dir)) != NULL) {
-        if (atoi(entry->d_name) > max)
+        if (atoi(entry->d_name) > max) {
             max = atoi(entry->d_name);
+        }
     }
 
     closedir(dir);

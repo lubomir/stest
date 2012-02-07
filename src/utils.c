@@ -69,8 +69,9 @@ TestPart get_test_part(const char *filename)
     ext++;
 
     for (i = 0; extensions[i] != NULL; i++) {
-        if (strcmp(ext, extensions[i]) == 0)
+        if (strcmp(ext, extensions[i]) == 0) {
             return 2 << i;
+        }
     }
 
     return TEST_UNKNOWN;

@@ -126,8 +126,9 @@ create_file(const char *dir, const char *name, const char *ext,
 
     copy_from_to(from, fh);
 
-    if (file)
+    if (file) {
         fclose(from);
+    }
     fclose(fh);
     free(path);
 }

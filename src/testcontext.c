@@ -60,8 +60,9 @@ void test_context_free(TestContext *tc)
  */
 static void test_context_print_color(TestContext *tc, char *color, char *str)
 {
-    if (!TC_IS_QUIET(tc))
+    if (!TC_IS_QUIET(tc)) {
         print_color(color, str);
+    }
 }
 
 /**
@@ -268,8 +269,9 @@ test_context_analyze_test_run(TestContext *tc,
             test_context_check_output_file, out_file, EXT_OUTPUT);
     test_context_check(tc, test, TEST_ERRORS,
             test_context_check_output_file, err_file, EXT_ERRORS);
-    if (tc->use_valgrind)
+    if (tc->use_valgrind) {
         test_context_analyze_memory(tc, test, mem_file);
+    }
 }
 
 /**
@@ -364,8 +366,9 @@ test_context_prepare_for_valgrind(TestContext *tc, char ***_args)
     int len = 1, i, modify_pos, fd;
     char *file = strdup("/tmp/stest-memory-XXXXXX");
 
-    for (i = 0; args[i] != NULL; i++)
+    for (i = 0; args[i] != NULL; i++) {
         len++;
+    }
 
     args = realloc(args, (4 + len) * sizeof(char *));
     memmove(args + 4, args, len * sizeof(char *));
@@ -430,8 +433,9 @@ static void test_context_run_test(Test *t, TestContext *tc)
     test_context_analyze_test_run(tc, t, out_file, err_file, mem_file, status);
 out:
     if (args) {
-        for (i = 0; args[i] != NULL; i++)
+        for (i = 0; args[i] != NULL; i++) {
             free(args[i]);
+        }
         free(args);
     }
 

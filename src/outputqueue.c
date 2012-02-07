@@ -57,8 +57,9 @@ void oqueue_pushvf(OQueue *q, const char *fmt, va_list ap)
         va_copy(ap_copy, ap);
         n = vsnprintf(str, len, fmt, ap_copy);
 
-        if (n > -1 && n < len)
+        if (n > -1 && n < len) {
             break;
+        }
 
         len *= 2;
         str = realloc(str, len * sizeof(char));
