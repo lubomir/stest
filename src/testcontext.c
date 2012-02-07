@@ -212,8 +212,6 @@ test_context_analyze_memory(TestContext *tc, Test *t, char *file)
 
 out:
     if (fh) fclose(fh);
-    unlink(file);
-    free(file);
 }
 
 /**
@@ -439,6 +437,10 @@ out:
 
     unlink(out_file);
     unlink(err_file);
+    if (mem_file) {
+        unlink(mem_file);
+        free(mem_file);
+    }
 }
 
 unsigned int
