@@ -8,13 +8,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#if defined(__GNUC__)
+#  define UNUSED(x) x __attribute__((unused))
+#else
+#  define UNUSED(x) x
+#endif
+
 static const char *exts[] = { EXT_INPUT, EXT_OUTPUT, EXT_ERRORS };
 
 /**
  * Print information about a test.
  */
 static void
-print_test(void *t, void *data)
+print_test(void *t, void * UNUSED(data))
 {
     Test *test = (Test*) t;
     printf("%-30s (%c%c:%c%c%c)\n", test->name,
