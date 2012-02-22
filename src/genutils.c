@@ -9,8 +9,7 @@
 char * sanitize_test_name(char *name)
 {
     char *res = name;
-    int len = strlen(name);
-    int i = 0, skip = 0;
+    int i = 0;
 
     while (isspace(*name)) name++;
     while (*name) {

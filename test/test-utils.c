@@ -116,7 +116,6 @@ void
 test_count_lines_on_fd_more_lines()
 {
     int from[2];
-    size_t lines;
 
     pipe(from);
 

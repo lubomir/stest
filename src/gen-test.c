@@ -183,7 +183,7 @@ int main(int argc, char *argv[])
     char buffer[128], test_name[128];
     char *files[] = { NULL, NULL, NULL };
     int  from_user[] = { 0, 0, 0 };
-    char *args = NULL, *retval = NULL, *name;
+    char *args = NULL, *retval = NULL;
 
     while (1) {
         int option_index = 0;

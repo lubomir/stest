@@ -104,8 +104,6 @@ test_context_handle_result(TestContext *tc,
 static int
 test_context_check_return_code(TestContext *tc, Test *test, int status)
 {
-    char *filename;
-    FILE *fh;
     int expected, actual;
 
     expected = test_get_exit_code(test);
@@ -363,7 +361,7 @@ static char *
 test_context_prepare_for_valgrind(TestContext *tc, char ***_args)
 {
     char **args = *_args;
-    int len = 1, i, modify_pos, fd;
+    int len = 1, i, fd;
     char *file = strdup("/tmp/stest-memory-XXXXXX");
 
     for (i = 0; args[i] != NULL; i++) {
@@ -402,7 +400,6 @@ static void test_context_run_test(Test *t, TestContext *tc)
     int in_fd, out_fd, err_fd, i;
     char out_file[] = "/tmp/stest-stdout-XXXXXX";
     char err_file[] = "/tmp/stest-stderr-XXXXXX";
-    pid_t child;
     int status = 0;
     char **args = NULL, *mem_file = NULL;
 

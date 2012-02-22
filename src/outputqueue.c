@@ -47,7 +47,7 @@ void oqueue_pushf(OQueue *q, const char *fmt, ...)
 void oqueue_pushvf(OQueue *q, const char *fmt, va_list ap)
 {
     char *str = NULL;
-    size_t len = 100;
+    ssize_t len = 100;
     int n;
     va_list ap_copy;
 
@@ -83,8 +83,8 @@ void oqueue_copy_from_fd(OQueue *dest, int source)
 void oqueue_copy_from_valgrind(OQueue *queue, FILE *fh, int contexts)
 {
     char *line = NULL;
-    ssize_t size;
-    size_t len = 0, strip;
+    ssize_t size, strip;
+    size_t len = 0;
     int i;
 
     fseek(fh, 0, SEEK_SET);
