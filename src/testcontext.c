@@ -333,9 +333,19 @@ test_context_skip(TestContext *tc, Test *t, const char *msg)
     tc->skipped++;
 }
 
+/**
+ * Given a file descriptor with standard input and descriptors for both
+ * standard and error output, execute the program as specified by args. The
+ * actual command to be executed is extracted from the command-line arguments
+ * parameter.
+ *
+ * @param in_fd     where to read standard input from
+ * @param out_fd    where to store standard output
+ * @param err_fd    where to store error output
+ * @param args      arguments of the program
+ */
 static void
-test_context_execute_test(TestContext *tc, Test *t,
-        int in_fd, int out_fd, int err_fd, char **args)
+execute_test(int in_fd, int out_fd, int err_fd, char **args)
 {
     static char * const env[] = { "MALLOC_CHECK_=2", NULL };
     int child;
@@ -357,8 +367,16 @@ test_context_execute_test(TestContext *tc, Test *t,
     close(err_fd);
 }
 
+/**
+ * Modify array of arguments so as to be passed to valgrind. The returned path
+ * points to a file that should be unlinked when it is no longer needed. Caller
+ * is responsible for freeing the returned pointer.
+ *
+ * @param _args pointer to a NULL-terminated array of strings @return filename
+ * path to a file where valgrind output will be stored
+ */
 static char *
-test_context_prepare_for_valgrind(TestContext *tc, char ***_args)
+prepare_for_valgrind(char ***_args)
 {
     char **args = *_args;
     int len = 1, i, fd;
@@ -417,13 +435,13 @@ static void test_context_run_test(Test *t, TestContext *tc)
     }
 
     if (tc->use_valgrind) {
-        mem_file = test_context_prepare_for_valgrind(tc, &args);
+        mem_file = prepare_for_valgrind(&args);
         if (!mem_file) {
             test_context_skip(tc, t, "can not open memory output file");
             goto out;
         }
     }
-    test_context_execute_test(tc, t, in_fd, out_fd, err_fd, args);
+    execute_test(in_fd, out_fd, err_fd, args);
 
     wait(&status);
 
