@@ -339,7 +339,7 @@ static void
 test_context_execute_test(TestContext *tc, Test *t,
         int in_fd, int out_fd, int err_fd, char **args)
 {
-    static char *env[] = { "MALLOC_CHECK_=2", NULL };
+    static char * const env[] = { "MALLOC_CHECK_=2", NULL };
     int child;
 
     child = fork();
