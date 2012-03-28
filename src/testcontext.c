@@ -476,7 +476,7 @@ test_context_run_tests(TestContext *tc, List *tests, VerbosityMode verbose)
     if (!TC_IS_QUIET(tc)) {
         printf("\n\n");
         oqueue_flush(tc->logs, stdout);
-        printf("%u tests, %d crashes, %d skipped, %u checks, %u failed"
+        printf("%u tests, %u crashes, %u skipped, %u checks, %u failed"
                " (%ld.%03ld seconds)\n",
                 tc->test_num, tc->crashed, tc->skipped, tc->check_num,
                 tc->check_failed, res.tv_sec, res.tv_usec / 1000);
