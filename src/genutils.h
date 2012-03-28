@@ -7,11 +7,12 @@
  * in the resulting string. This function modifies the passed string.
  *
  * @param name  name to sanitize
- * @return string with
+ * @return pointer to first non-whitespace character in name
  */
 char * sanitize_test_name(char *name);
 
 /**
+ * Count tests in a given directory.
  */
 int get_test_num(const char *dirpath);
 

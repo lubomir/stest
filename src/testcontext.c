@@ -46,7 +46,7 @@ void test_context_free(TestContext *tc)
 }
 
 /**
- * Return 1 if test context is to set to be totally quiet.
+ * Return 1 if test context is set to be totally quiet.
  */
 #define TC_IS_QUIET(tc) (tc->verbose == MODE_QUIET)
 
