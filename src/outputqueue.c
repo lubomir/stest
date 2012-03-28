@@ -23,7 +23,7 @@ void oqueue_free(OQueue *q)
     free(q);
 }
 
-void oqueue_push(OQueue *q, char *str)
+void oqueue_push(OQueue *q, const char *str)
 {
     q->data = list_prepend(q->data, strdup(str));
 }

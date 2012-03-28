@@ -34,7 +34,7 @@ void oqueue_free(OQueue *q);
  * @param q     the output queue
  * @param str   string to be added
  */
-void oqueue_push(OQueue *q, char *str);
+void oqueue_push(OQueue *q, const char *str);
 
 /**
  * Printf-like version of pushing data to output queue.
