@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
         { "quiet",   no_argument, NULL, 'q' },
         { "help",    no_argument, NULL, 'h' },
         { "version", no_argument, NULL, 'V' },
-        { 0, 0, 0, 0 }
+        { NULL, 0, NULL, 0 }
     };
 
     while (1) {

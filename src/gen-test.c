@@ -141,7 +141,7 @@ create_file(const char *dir, const char *name, const char *ext,
 
 #define OPTSTRING "ioer:a:lhV"
 
-static void help()
+static void help(void)
 {
     puts("SYNOPSIS");
     puts("\tgen-test [ioeralhV] [TESTDIR]");
@@ -178,7 +178,7 @@ static const struct option long_options[] = {
     { "list",       no_argument,        NULL, 'l' },
     { "help",       no_argument,        NULL, 'h' },
     { "version",    no_argument,        NULL, 'V' },
-    { 0, 0, 0, 0 }
+    { NULL, 0, NULL, 0 }
 };
 
 int main(int argc, char *argv[])

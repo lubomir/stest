@@ -8,7 +8,7 @@ struct oqueue_t {
     List *data;
 };
 
-OQueue * oqueue_new()
+OQueue * oqueue_new(void)
 {
     OQueue *q = malloc(sizeof(OQueue));
     q->data = NULL;

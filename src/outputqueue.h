@@ -19,7 +19,7 @@ typedef struct oqueue_t OQueue;
  *
  * @return new output queue
  */
-OQueue * oqueue_new();
+OQueue * oqueue_new(void);
 
 /**
  * Free memory used by the output queue.
