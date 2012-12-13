@@ -4,7 +4,7 @@ AC_CONFIG_SRCDIR([src/stest.c])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_AUX_DIR([config])
 
-AM_INIT_AUTOMAKE([foreign subdir-objects])
+AM_INIT_AUTOMAKE([foreign subdir-objects -Wall])
 AM_SILENT_RULES
 
 # Checks for programs.
