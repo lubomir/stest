@@ -3,12 +3,14 @@ AC_INIT([stest], [0.1], [lubomir.sedlar@gmail.com])
 AC_CONFIG_SRCDIR([src/stest.c])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_AUX_DIR([config])
+AC_CONFIG_MACRO_DIR([m4])
 
 AM_INIT_AUTOMAKE([foreign subdir-objects -Wall])
 AM_SILENT_RULES
 
 # Checks for programs.
 AC_PROG_CC
+AM_PROG_CC_C_O
 AC_PROG_LIBTOOL
 
 AC_ARG_ENABLE([tests],

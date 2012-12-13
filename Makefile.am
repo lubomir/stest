@@ -1,4 +1,4 @@
-ACLOCAL_AMFLAGS = $$ACLOCAL_ARGS
+ACLOCAL_AMFLAGS = $$ACLOCAL_ARGS -I m4
 
 bin_PROGRAMS = stest gen-test
 
@@ -29,9 +29,9 @@ TESTS_ENVIRONMENT = NO_MAKE="yes" CUTTER="$(CUTTER)"
 echo-cutter:
 	@echo $(CUTTER)
 
-INCLUDES = $(CUTTER_CFLAGS) -I$(top_srcdir)/src
+AM_CPPLAGS = $(CUTTER_CFLAGS) -I$(top_builddir)/src
 LIBS += $(CUTTER_LIBS)
-LDFLAGS += -module -rpath $(libdir) -avoid-version -no-undefined
+AM_LDFLAGS = -module -rpath $(libdir) -avoid-version -no-undefined
 
 test_test_list_la_SOURCES = test/test-list.c \
 			    src/list.c
