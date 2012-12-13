@@ -38,3 +38,7 @@ In source directory, run
 
  + only print one header for one failed test
  + proper plurals in messages: contexts, lines
+ + full l10n maybe?
+ + pass some arguments to diff (ingore whitespace, case insensitive)
+ + run tests in a temporary directory
+ + add man pages
