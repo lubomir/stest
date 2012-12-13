@@ -1,6 +1,10 @@
 #!/bin/bash
 
-export BASE_DIR="$(dirname $0)"
+if test -z "$TOP_DIR"; then
+    export BASE_DIR="$(dirname $0)"
+else
+    export BASE_DIR="$TOP_DIR/test"
+fi
 top_dir="$BASE_DIR/.."
 
 if test -z "$NO_MAKE"; then

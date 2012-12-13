@@ -2,6 +2,13 @@ ACLOCAL_AMFLAGS = $$ACLOCAL_ARGS -I m4
 
 bin_PROGRAMS = stest gen-test
 
+noinst_HEADERS = src/genutils.h \
+		 src/list.h \
+		 src/outputqueue.h \
+		 src/test.h \
+		 src/testcontext.h \
+		 src/utils.h
+
 stest_SOURCES = src/stest.c \
 		src/list.c \
 		src/outputqueue.c \
@@ -18,18 +25,19 @@ gen_test_SOURCES = src/gen-test.c \
 gen_test_CFLAGS = ${AM_CFLAGS}
 
 if ENABLE_TESTS
-noinst_LTLIBRARIES = test/test_list.la \
-		     test/test_utils.la \
-		     test/test_oqueue.la \
-		     test/test_genutils.la
+check_LTLIBRARIES = test/test_list.la \
+		    test/test_utils.la \
+		    test/test_oqueue.la \
+		    test/test_genutils.la
+dist_check_SCRIPTS = test/run-test.sh
 
 TESTS = test/run-test.sh
-TESTS_ENVIRONMENT = NO_MAKE="yes" CUTTER="$(CUTTER)"
+TESTS_ENVIRONMENT = NO_MAKE="yes" CUTTER="$(CUTTER)" TOP_DIR="$(top_builddir)"
 
 echo-cutter:
 	@echo $(CUTTER)
 
-AM_CPPLAGS = $(CUTTER_CFLAGS) -I$(top_builddir)/src
+AM_CFLAGS = $(CUTTER_CFLAGS) -I$(top_srcdir)/src
 LIBS += $(CUTTER_LIBS)
 AM_LDFLAGS = -module -rpath $(libdir) -avoid-version -no-undefined
 
