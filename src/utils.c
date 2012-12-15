@@ -169,7 +169,7 @@ char ** parse_args(const char *str, size_t *len)
     return array;
 
 out:
-    if (list) list_destroy(list, DESTROYFUNC(free));
+    list_destroy(list, DESTROYFUNC(free));
     if (len) *len = 0;
     free(string);
     return NULL;
