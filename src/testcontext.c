@@ -133,7 +133,6 @@ test_context_check_output_file(TestContext *tc,
     pid_t child;
     int status, res;
     int mypipe[2];
-    size_t line_num = 0;
 
     if (pipe(mypipe) < 0) {
         perror("pipe");
@@ -172,7 +171,7 @@ test_context_check_output_file(TestContext *tc,
             oqueue_copy_from_fd(tc->logs, mypipe[PIPE_READ]);
             oqueue_push(tc->logs, "\n");
         } else {                /* Otherwise only print how big the diff is */
-            line_num = count_lines_on_fd(mypipe[PIPE_READ]);
+            size_t line_num = count_lines_on_fd(mypipe[PIPE_READ]);
             oqueue_pushf(tc->logs, " - diff has %zu lines\n\n", line_num - 2);
         }
     }
@@ -183,7 +182,6 @@ test_context_check_output_file(TestContext *tc,
 static void
 test_context_analyze_memory(TestContext *tc, Test *t, char *file)
 {
-    static const char *names[] = { "error", "errors" };
     int errors, contexts;
     FILE *fh = fopen(file, "r");
     if (!get_num_errors(fh, &errors, &contexts)) {
@@ -200,7 +198,7 @@ test_context_analyze_memory(TestContext *tc, Test *t, char *file)
         if (TC_IS_QUIET(tc)) goto out;
         oqueue_pushf(tc->logs, "Test %s failed:\ndetected %d memory %s in %d contexts\n",
                 str_to_bold(t->name), errors,
-                errors > 1 ? names[1] : names[0],
+                errors > 1 ? "error" : "errors",
                 contexts);
         if (tc->verbose == MODE_VERBOSE) {
             oqueue_copy_from_valgrind(tc->logs, fh, contexts);
