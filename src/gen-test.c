@@ -14,7 +14,7 @@
 #  define UNUSED(x) x
 #endif
 
-static const char *exts[] = { EXT_INPUT, EXT_OUTPUT, EXT_ERRORS };
+static const char const *exts[] = { EXT_INPUT, EXT_OUTPUT, EXT_ERRORS };
 
 /**
  * Print information about a test.
