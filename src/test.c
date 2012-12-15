@@ -22,14 +22,14 @@ List * test_load_from_dir(const char *dir)
     if (files_num < 0) return NULL;
 
     for (i = 0; i < files_num;) {
-        test = malloc(sizeof(Test));
-        test->dir = strdup(dir);
-        test->parts = 0;
         dot = strchr(entries[i]->d_name, '.');
         if (dot == NULL) {
             free(entries[i]);
             continue;
         }
+        test = malloc(sizeof(Test));
+        test->dir = strdup(dir);
+        test->parts = 0;
         len = dot - entries[i]->d_name;
         test->name = calloc(len + 1, sizeof(char));
         strncpy(test->name, entries[i]->d_name, len);
