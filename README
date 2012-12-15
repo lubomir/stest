@@ -26,7 +26,7 @@ memory errors.
 
 In source directory, run
 
-    $ ./autogen.sh
+    $ autoreconf -i
     $ ./configure
     $ make
     $ make install
