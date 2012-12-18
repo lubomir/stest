@@ -3,7 +3,7 @@
 if test -z "$TOP_DIR"; then
     export BASE_DIR="$(dirname $0)"
 else
-    export BASE_DIR="$TOP_DIR/test"
+    export BASE_DIR="$TOP_DIR/tests"
 fi
 top_dir="$BASE_DIR/.."
 

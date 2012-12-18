@@ -1,0 +1,42 @@
+check_LTLIBRARIES = tests/test_list.la \
+		    tests/test_utils.la \
+		    tests/test_oqueue.la \
+		    tests/test_genutils.la
+dist_check_SCRIPTS = tests/run-test.sh
+
+TESTS = tests/run-test.sh
+TESTS_ENVIRONMENT = NO_MAKE="yes" CUTTER="$(CUTTER)" TOP_DIR="$(top_builddir)"
+
+echo-cutter:
+	@echo $(CUTTER)
+
+MY_CFLAGS = $(CUTTER_CFLAGS) -I$(top_srcdir)/src
+MY_LIBS = $(CUTTER_LIBS)
+MY_LDFLAGS = -module -rpath $(libdir) -avoid-version -no-undefined
+
+tests_test_list_la_SOURCES = tests/test-list.c \
+        		    src/list.c
+tests_test_list_la_CFLAGS = $(MY_CFLAGS)
+tests_test_list_la_LIBS = $(MY_LIBS)
+tests_test_list_la_LDFLAGS = $(MY_LDFLAGS)
+
+tests_test_utils_la_SOURCES = tests/test-utils.c \
+        		     src/list.c \
+        		     src/utils.c
+tests_test_utils_la_CFLAGS = $(MY_CFLAGS)
+tests_test_utils_la_LIBS = $(MY_LIBS)
+tests_test_utils_la_LDFLAGS = $(MY_LDFLAGS)
+
+tests_test_oqueue_la_SOURCES = tests/test-oqueue.c \
+        		      src/list.c \
+        		      src/utils.c \
+        		      src/outputqueue.c
+tests_test_oqueue_la_CFLAGS = $(MY_CFLAGS)
+tests_test_oqueue_la_LIBS = $(MY_LIBS)
+tests_test_oqueue_la_LDFLAGS = $(MY_LDFLAGS)
+
+tests_test_genutils_la_SOURCES = tests/test-genutils.c \
+        			src/genutils.c
+tests_test_genutils_la_CFLAGS = $(MY_CFLAGS)
+tests_test_genutils_la_LIBS = $(MY_LIBS)
+tests_test_genutils_la_LDFLAGS = $(MY_LDFLAGS)
