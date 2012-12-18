@@ -25,6 +25,15 @@ AM_CONDITIONAL([ENABLE_TESTS], [test "x$enable_tests" != "xno"])
 
 # Checks for typedefs, structures, and compiler characteristics.
 
+# Does compiler support -Wall
+AC_MSG_CHECKING(whether compiler understands -Wall)
+old_AM_CFLAGS="$AM_CFLAGS"
+CFLAGS="$CFLAGS -Wall"
+AC_TRY_COMPILE([],[],
+               AC_MSG_RESULT(yes),
+               AC_MSG_RESULT(no)
+               AM_CFLAGS="$old_AM_CFLAGS")
+
 # Checks for library functions.
 
 AC_OUTPUT([Makefile])
