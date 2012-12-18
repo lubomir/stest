@@ -37,22 +37,34 @@ TESTS_ENVIRONMENT = NO_MAKE="yes" CUTTER="$(CUTTER)" TOP_DIR="$(top_builddir)"
 echo-cutter:
 	@echo $(CUTTER)
 
-AM_CFLAGS = $(CUTTER_CFLAGS) -I$(top_srcdir)/src
-LIBS += $(CUTTER_LIBS)
-AM_LDFLAGS = -module -rpath $(libdir) -avoid-version -no-undefined
+MY_CFLAGS = $(CUTTER_CFLAGS) -I$(top_srcdir)/src
+MY_LIBS = $(CUTTER_LIBS)
+MY_LDFLAGS = -module -rpath $(libdir) -avoid-version -no-undefined
 
 test_test_list_la_SOURCES = test/test-list.c \
 			    src/list.c
+test_test_list_la_CFLAGS = $(MY_CFLAGS)
+test_test_list_la_LIBS = $(MY_LIBS)
+test_test_list_la_LDFLAGS = $(MY_LDFLAGS)
 
 test_test_utils_la_SOURCES = test/test-utils.c \
 			     src/list.c \
 			     src/utils.c
+test_test_utils_la_CFLAGS = $(MY_CFLAGS)
+test_test_utils_la_LIBS = $(MY_LIBS)
+test_test_utils_la_LDFLAGS = $(MY_LDFLAGS)
 
 test_test_oqueue_la_SOURCES = test/test-oqueue.c \
 			      src/list.c \
 			      src/utils.c \
 			      src/outputqueue.c
+test_test_oqueue_la_CFLAGS = $(MY_CFLAGS)
+test_test_oqueue_la_LIBS = $(MY_LIBS)
+test_test_oqueue_la_LDFLAGS = $(MY_LDFLAGS)
 
 test_test_genutils_la_SOURCES = test/test-genutils.c \
 				src/genutils.c
+test_test_genutils_la_CFLAGS = $(MY_CFLAGS)
+test_test_genutils_la_LIBS = $(MY_LIBS)
+test_test_genutils_la_LDFLAGS = $(MY_LDFLAGS)
 endif
