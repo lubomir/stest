@@ -47,6 +47,7 @@ list_tests(const char *dir)
 static void
 copy_from_to(FILE *from, FILE *to)
 {
+    return_if_fail(from != NULL && to != NULL);
     char buffer[1024];
     size_t len;
     do {
@@ -111,7 +112,7 @@ create_file(const char *dir, const char *name, const char *ext,
         const char *file, int from_user)
 {
     char *path;
-    FILE *fh, *from;
+    FILE *fh, *from = NULL;
 
     if (!file && !from_user) return;
 

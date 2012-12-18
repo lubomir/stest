@@ -41,6 +41,13 @@ int filter_tests_wrap(const struct dirent *entry);
 unsigned int count_lines(const char *buffer, int len);
 
 /**
+ * If condition evalueates to false, return from current function.
+ *
+ * @param cond  condition to test
+ */
+#define return_if_fail(cond) do { if (!(cond)) return; } while (0)
+
+/**
  * If condition evaluates to false, return value and exit function.
  *
  * @param cond  condition to test
