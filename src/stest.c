@@ -23,6 +23,8 @@ static void help(void)
     puts("\tstest ["OPTSTRING"] COMMAND [TESTDIR]");
 
     puts("\nOPTIONS");
+    puts("\t    --diff=OPTIONS\n\t\tpass OPTIONS to diff; see man diff(1)"
+           " for available options\n");
     puts("\t-h, --help\n\t\tdisplay this help\n");
     puts("\t-m, --memory\n\t\trun Valgrind memory checking tool\n");
     puts("\t-v, --verbose\n\t\tdisplay output diff of failed tests\n");
