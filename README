@@ -14,6 +14,12 @@ for these files is a tests/ subdirectory.
 Use the gen-test utility to easily generate these tests. Both gen-test and
 stest have some help available with --help option.
 
+## Output checking
+
+Both stdout and stderr are checked using the diff(1) utility. This produces
+minimal (-d) unified diff (-u). If you need to add another argument to diff,
+use --diff=OPT. Useful options include -w for ignoring whitespace changes.
+
 # Requirements
 
 Build dependencies of stest are a C compiler, Cutter unit testing library and
@@ -39,6 +45,5 @@ In source directory, run
  + only print one header for one failed test
  + proper plurals in messages: contexts, lines
  + full l10n maybe?
- + pass some arguments to diff (ingore whitespace, case insensitive)
  + run tests in a temporary directory
  + add man pages
