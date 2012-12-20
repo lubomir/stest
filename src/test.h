@@ -29,7 +29,7 @@ List * test_load_from_dir(const char *dir);
 /**
  * Free a test.
  *
- * @param test  test to be freed
+ * @param test  test to be freed (allow-none)
  */
 void test_free(Test *test);
 
@@ -49,7 +49,7 @@ int test_get_input_fd(Test *t);
  *
  * @param test  test
  * @return NULL if arguments are malformed, otherwise return NULL-terminated
- *         array of strings
+ *         array of strings (transfer full)
  */
 char ** test_get_args(Test *test, size_t *count);
 

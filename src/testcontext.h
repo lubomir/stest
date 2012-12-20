@@ -19,7 +19,7 @@ typedef struct test_context_t TestContext;
  * @param cmd       command to be tested
  * @param dir       directory where tests are stored
  * @param mem       whether to check for memory errors
- * @param diff_opts option string passed to diff [NULL]
+ * @param diff_opts option string passed to diff (allow-none)
  * @return          new TestContext
  */
 TestContext * test_context_new(const char *cmd,
@@ -30,7 +30,7 @@ TestContext * test_context_new(const char *cmd,
 /**
  * Free memory used by TestContext.
  *
- * @param tc    TestContext to be freed
+ * @param tc    TestContext to be freed (allow-none)
  */
 void test_context_free(TestContext *tc);
 

@@ -24,7 +24,7 @@ OQueue * oqueue_new(void);
 /**
  * Free memory used by the output queue.
  *
- * @param q     queue to be freed
+ * @param q     queue to be freed (allow-none)
  */
 void oqueue_free(OQueue *q);
 

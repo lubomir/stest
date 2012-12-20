@@ -167,7 +167,7 @@ size_t count_lines_on_fd(int source);
  * array is stored there.
  *
  * @param str   string to be parsed
- * @param len   pointer size of the returned array
+ * @param len   pointer size of the returned array (out) (allow-none)
  * @return NULL-terminated array of strings or NULL on failure
  */
 char ** parse_args(const char *str, size_t *len);
@@ -196,7 +196,7 @@ char * str_to_bold(const char *str);
  * Free a NULL-terminated array of strings. If array is NULL, no action
  * is performed.
  *
- * @param array     NULL-terminated array to be freed (NULL)
+ * @param array     NULL-terminated array to be freed (allow-none)
  */
 void str_array_free(char **array);
 
