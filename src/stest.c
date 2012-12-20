@@ -1,5 +1,6 @@
 #include <config.h>
 
+#include <errno.h>
 #include <getopt.h>
 #include <stdio.h>
 #include <sys/stat.h>
@@ -94,7 +95,12 @@ int main(int argc, char *argv[])
 
     List *tests = test_load_from_dir(dir);
     if (tests == NULL) {
-        perror("Can not open directory with tests");
+        fprintf(stderr, "No tests loaded from directory '%s'", dir);
+        if (errno == 0) {
+            fprintf(stderr, "\n");
+        } else {
+            perror("");
+        }
         return 254;
     }
 

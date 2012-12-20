@@ -17,6 +17,10 @@ struct test_t {
 /**
  * Load all test definitions from a directory.
  *
+ * This function returns NULL if there was a problem loading tests as well as
+ * when there no tests present in 'dir'. These situations can be told apart
+ * by errno: on error it is set to non-zero value.
+ *
  * @param dir   path to directory with tests
  * @return      list of tests or NULL on failure
  */
