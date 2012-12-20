@@ -51,6 +51,9 @@ int main(int argc, char *argv[])
     char *diff_opts = NULL;
     char c;
 
+    TestContext *tc;
+    List *tests;
+
     static const struct option long_options[] = {
         { "diff",    required_argument, NULL, 'd' },
         { "memory",  no_argument,       NULL, 'm' },
@@ -100,7 +103,7 @@ int main(int argc, char *argv[])
         dir = argv[optind];
     }
 
-    List *tests = test_load_from_dir(dir);
+    tests = test_load_from_dir(dir);
     if (tests == NULL) {
         fprintf(stderr, "No tests loaded from directory '%s'", dir);
         if (errno == 0) {
@@ -120,7 +123,7 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    TestContext *tc = test_context_new(cmd, dir, use_valgrind, diff_opts);
+    tc = test_context_new(cmd, dir, use_valgrind, diff_opts);
     failed_checks = test_context_run_tests(tc, tests, verbosity_level);
     list_destroy(tests, DESTROYFUNC(test_free));
     test_context_free(tc);

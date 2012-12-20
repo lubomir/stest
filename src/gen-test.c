@@ -47,9 +47,11 @@ list_tests(const char *dir)
 static void
 copy_from_to(FILE *from, FILE *to)
 {
-    return_if_fail(from != NULL && to != NULL);
     char buffer[1024];
     size_t len;
+
+    return_if_fail(from != NULL && to != NULL);
+
     do {
         len = fread(buffer, sizeof(char), 1024, from);
         fwrite(buffer, sizeof(char), len, to);
@@ -185,7 +187,7 @@ static const struct option long_options[] = {
 int main(int argc, char *argv[])
 {
     char c;
-    int i, opt_list_tests = 0;
+    int i, opt_list_tests = 0, test_no = 0;
     char *dir = "tests";
     char buffer[128], test_name[128];
     char *files[] = { NULL, NULL, NULL };
@@ -252,7 +254,7 @@ int main(int argc, char *argv[])
         return EXIT_SUCCESS;
     }
 
-    int test_no = get_test_num(dir) + 1;
+    test_no = get_test_num(dir) + 1;
     printf("Test name: ");
     fflush(stdout);
     fgets(buffer, 128, stdin);

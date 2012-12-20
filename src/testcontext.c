@@ -87,11 +87,11 @@ test_context_handle_result(TestContext *tc,
                            const char *fmt,
                            ...)
 {
+    va_list args;
     if (cond) {
         test_context_print_color(tc, GREEN, ".");
         return 0;
     }
-    va_list args;
     va_start(args, fmt);
     test_context_print_color(tc, RED, "F");
     oqueue_pushf(tc->logs, "Test %s failed:\n", str_to_bold(test->name));
