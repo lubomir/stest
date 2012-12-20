@@ -192,4 +192,12 @@ int get_num_errors(FILE *fh, int *errors, int *contexts);
  */
 char * str_to_bold(const char *str);
 
+/**
+ * Free a NULL-terminated array of strings. If array is NULL, no action
+ * is performed.
+ *
+ * @param array     NULL-terminated array to be freed (NULL)
+ */
+void str_array_free(char **array);
+
 #endif /* end of include guard: UTILS_H */

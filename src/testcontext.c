@@ -448,7 +448,7 @@ out:
  */
 static void test_context_run_test(Test *t, TestContext *tc)
 {
-    int in_fd, out_fd, err_fd, i;
+    int in_fd, out_fd, err_fd;
     char out_file[] = "/tmp/stest-stdout-XXXXXX";
     char err_file[] = "/tmp/stest-stderr-XXXXXX";
     int status = 0;
@@ -480,12 +480,7 @@ static void test_context_run_test(Test *t, TestContext *tc)
 
     test_context_analyze_test_run(tc, t, out_file, err_file, mem_file, status);
 out:
-    if (args) {
-        for (i = 0; args[i] != NULL; i++) {
-            free(args[i]);
-        }
-        free(args);
-    }
+    str_array_free(args);
 
     unlink(out_file);
     unlink(err_file);

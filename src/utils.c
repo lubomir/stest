@@ -195,3 +195,14 @@ char * str_to_bold(const char *str)
     snprintf(array, MAXLEN, "%s%s%s", BOLD, str, NORMAL);
     return array;
 }
+
+void str_array_free(char **array)
+{
+    size_t i;
+    if (array) {
+        for (i = 0; array[i] != NULL; ++i) {
+            free(array[i]);
+        }
+        free(array);
+    }
+}
