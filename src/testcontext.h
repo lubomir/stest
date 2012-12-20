@@ -16,12 +16,16 @@ typedef struct test_context_t TestContext;
 /**
  * Create new test context to run tests in.
  *
- * @param cmd   command to be tested
- * @param dir   directory where tests are stored
- * @param mem   whether to check for memory errors
- * @return      new TestContext
+ * @param cmd       command to be tested
+ * @param dir       directory where tests are stored
+ * @param mem       whether to check for memory errors
+ * @param diff_opts option string passed to diff [NULL]
+ * @return          new TestContext
  */
-TestContext * test_context_new(const char *cmd, const char *dir, int mem);
+TestContext * test_context_new(const char *cmd,
+                               const char *dir,
+                               int mem,
+                               char *diff_opts);
 
 /**
  * Free memory used by TestContext.

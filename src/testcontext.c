@@ -1,4 +1,5 @@
 #include <fcntl.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/time.h>
@@ -14,6 +15,7 @@
 struct test_context_t {
     char *cmd;
     char *dir;
+    char *diff_opts;
     int use_valgrind;
     OQueue *logs;
     unsigned int test_num;
@@ -24,7 +26,10 @@ struct test_context_t {
     VerbosityMode verbose;
 };
 
-TestContext * test_context_new(const char *cmd, const char *dir, int mem)
+TestContext * test_context_new(const char *cmd,
+                               const char *dir,
+                               int mem,
+                               char *diff_opts)
 {
     TestContext *tc = calloc(sizeof(TestContext), 1);
     tc->cmd = strdup(cmd);
@@ -32,6 +37,7 @@ TestContext * test_context_new(const char *cmd, const char *dir, int mem)
     tc->dir = strdup(dir);
     tc->logs = oqueue_new();
     tc->use_valgrind = mem;
+    tc->diff_opts = diff_opts;
     return tc;
 }
 
@@ -115,6 +121,36 @@ test_context_check_return_code(TestContext *tc, Test *test, int status)
 }
 
 /**
+ * Get string array to pass to execvp(3) to invoke diff.
+ *
+ * @param tc    test context
+ * @param orig  first file to pass to diff
+ * @param real  second file to pass to diff
+ * @return      NULL-terminated array of strings
+ */
+static char **
+test_context_get_diff_cmd(TestContext *tc, const char *orig, const char *real)
+{
+    const char const *template = "diff -u -d --label=expected --label=actual";
+    size_t len;
+    char *cmd, **args;
+
+    len = strlen(template) + strlen(orig) + strlen(real) + 10;
+    len += tc->diff_opts != NULL ? strlen(tc->diff_opts) : 0;
+    cmd = calloc(1, len);
+    snprintf(cmd, len, "%s %s %s %s",
+            template,
+            tc->diff_opts ? tc->diff_opts : "",
+            orig, real);
+
+    args = parse_args(cmd, NULL);
+
+    free(cmd);
+
+    return args;
+}
+
+/**
  * Check if given output matches the expected one.
  *
  * @param tc    test context
@@ -146,11 +182,10 @@ test_context_check_output_file(TestContext *tc,
         perror("fork");
         exit(EXIT_FAILURE);
     } else if (child == 0) {    /* child */
+        char **args = test_context_get_diff_cmd(tc, expected, fname);
         close(mypipe[PIPE_READ]);
         dup2(mypipe[PIPE_WRITE], STDOUT_FILENO);
-        execlp("diff",
-                "diff", "-u", "-d", "--label=expected", "--label=actual",
-                expected, fname, NULL);
+        execvp("diff", args);
         perror("exec");
         exit(EXIT_FAILURE);
     }

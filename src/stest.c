@@ -46,14 +46,16 @@ int main(int argc, char *argv[])
 
     int use_valgrind = 0;
     int verbosity_level = MODE_NORMAL;
+    char *diff_opts = NULL;
     char c;
 
     static const struct option long_options[] = {
-        { "memory",  no_argument, NULL, 'm' },
-        { "verbose", no_argument, NULL, 'v' },
-        { "quiet",   no_argument, NULL, 'q' },
-        { "help",    no_argument, NULL, 'h' },
-        { "version", no_argument, NULL, 'V' },
+        { "diff",    required_argument, NULL, 'd' },
+        { "memory",  no_argument,       NULL, 'm' },
+        { "verbose", no_argument,       NULL, 'v' },
+        { "quiet",   no_argument,       NULL, 'q' },
+        { "help",    no_argument,       NULL, 'h' },
+        { "version", no_argument,       NULL, 'V' },
         { NULL, 0, NULL, 0 }
     };
 
@@ -78,6 +80,9 @@ int main(int argc, char *argv[])
         case 'V':
             printf("%s %s\n", PACKAGE_NAME, VERSION);
             return 0;
+        case 'd':
+            diff_opts = optarg;
+            break;
         default:
             usage(argv[0]);
             return 255;
@@ -113,7 +118,7 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    TestContext *tc = test_context_new(cmd, dir, use_valgrind);
+    TestContext *tc = test_context_new(cmd, dir, use_valgrind, diff_opts);
     failed_checks = test_context_run_tests(tc, tests, verbosity_level);
     list_destroy(tests, DESTROYFUNC(test_free));
     test_context_free(tc);
