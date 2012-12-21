@@ -123,3 +123,8 @@ out:
     free(path);
     return code;
 }
+
+char * test_get_file_for_ext(Test *test, const char *ext)
+{
+    return get_filepath(test->dir, test->name, ext);
+}

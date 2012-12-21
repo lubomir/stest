@@ -15,7 +15,6 @@
 
 struct test_context_t {
     char *cmd;
-    char *dir;
     char *diff_opts;
     int use_valgrind;
     OQueue *logs;
@@ -31,7 +30,6 @@ TestContext * test_context_new(void)
 {
     TestContext *tc = calloc(sizeof(TestContext), 1);
     tc->verbose = MODE_NORMAL;
-    tc->dir = strdup("tests");
     tc->logs = oqueue_new();
     return tc;
 }
@@ -54,12 +52,6 @@ int test_context_set_command(TestContext *tc, const char *cmd)
     return 1;
 }
 
-void test_context_set_dir(TestContext *tc, const char *dir)
-{
-    free(tc->dir);
-    tc->dir = strdup(dir);
-}
-
 void test_context_set_use_valgrind(TestContext *tc)
 {
     tc->use_valgrind = 1;
@@ -80,7 +72,6 @@ void test_context_free(TestContext *tc)
 {
     if (tc) {
         free(tc->cmd);
-        free(tc->dir);
         oqueue_free(tc->logs);
     }
     free(tc);
@@ -210,7 +201,7 @@ test_context_check_output_file(TestContext *tc,
         exit(EXIT_FAILURE);
     }
 
-    expected = get_filepath(tc->dir, t->name, ext);
+    expected = test_get_file_for_ext(t, ext);
 
     child = fork();
     if (child == -1) {

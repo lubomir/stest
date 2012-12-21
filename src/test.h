@@ -61,4 +61,13 @@ char ** test_get_args(Test *test, size_t *count);
  */
 int test_get_exit_code(Test *test);
 
+/**
+ * Get file path for file with given extension.
+ *
+ * @param test  test to be queried
+ * @param ext   requested extension
+ * @return path to the file (transfer full)
+ */
+char * test_get_file_for_ext(Test *test, const char *ext);
+
 #endif /* end of include guard: TEST_H */

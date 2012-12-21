@@ -32,14 +32,6 @@ TestContext * test_context_new(void);
 int test_context_set_command(TestContext *tc, const char *cmd);
 
 /**
- * Set directory with tests.
- *
- * @param tc        test context to modify
- * @param dir       directory where tests are stored
- */
-void test_context_set_dir(TestContext *tc, const char *cmd);
-
-/**
  * Use Valgrind tool in the context.
  *
  * @param tc        test context to modify
