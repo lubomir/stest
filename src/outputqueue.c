@@ -46,7 +46,7 @@ void oqueue_pushf(OQueue *q, const char *fmt, ...)
 
 void oqueue_pushvf(OQueue *q, const char *fmt, va_list ap)
 {
-    char *str = NULL;
+    char *str;
     ssize_t len = 100;
     int n;
     va_list ap_copy;

@@ -198,8 +198,8 @@ char * str_to_bold(const char *str)
 
 void str_array_free(char **array)
 {
-    size_t i;
     if (array) {
+        size_t i;
         for (i = 0; array[i] != NULL; ++i) {
             free(array[i]);
         }

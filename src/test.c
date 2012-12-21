@@ -62,11 +62,10 @@ void test_free(Test *test)
 int test_get_input_fd(Test *test)
 {
     int fd;
-    char *input_file;
     if (!FLAG_SET(test->parts, TEST_INPUT)) {
         fd = open("/dev/null", O_RDONLY);
     } else {
-        input_file = get_filepath(test->dir, test->name, EXT_INPUT);
+        char *input_file = get_filepath(test->dir, test->name, EXT_INPUT);
         fd = open(input_file, O_RDONLY);
         free(input_file);
     }

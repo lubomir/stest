@@ -335,7 +335,7 @@ test_context_prepare_outfiles(char *out_file,
 static char **
 test_context_get_args(TestContext *tc, Test *t)
 {
-    char **args = NULL;
+    char **args;
     size_t count = 0;
 
     args = test_get_args(t, &count);
