@@ -42,13 +42,9 @@ static void help(void)
 
 int main(int argc, char *argv[])
 {
-    struct stat info;
-    char *cmd, *dir = "tests";
+    char *dir = "tests";
     unsigned int failed_checks;
 
-    int use_valgrind = 0;
-    int verbosity_level = MODE_NORMAL;
-    char *diff_opts = NULL;
     char c;
 
     TestContext *tc;
@@ -64,6 +60,8 @@ int main(int argc, char *argv[])
         { NULL, 0, NULL, 0 }
     };
 
+    tc = test_context_new ();
+
     while (1) {
         int option_index = 0;
         c = getopt_long(argc, argv, OPTSTRING, long_options, &option_index);
@@ -74,19 +72,19 @@ int main(int argc, char *argv[])
             help();
             return 0;
         case 'm':
-            use_valgrind = 1;
+            test_context_set_use_valgrind(tc);
             break;
         case 'v':
-            verbosity_level = MODE_VERBOSE;
+            test_context_set_verbosity(tc, MODE_VERBOSE);
             break;
         case 'q':
-            verbosity_level = MODE_QUIET;
+            test_context_set_verbosity(tc, MODE_QUIET);
             break;
         case 'V':
             printf("%s %s\n", PACKAGE_NAME, VERSION);
             return 0;
         case 'd':
-            diff_opts = optarg;
+            test_context_set_diff_opts(tc, optarg);
             break;
         default:
             usage(argv[0]);
@@ -98,7 +96,11 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Missing command name\n");
         return 253;
     }
-    cmd = argv[optind];
+
+    if (!test_context_set_command(tc, argv[optind])) {
+        exit(EXIT_FAILURE);
+    }
+
     if (++optind < argc) {
         dir = argv[optind];
     }
@@ -114,17 +116,7 @@ int main(int argc, char *argv[])
         return 254;
     }
 
-    if (stat(cmd, &info) == -1) {
-        perror("stat");
-        exit(EXIT_FAILURE);
-    }
-    if (!FLAG_SET(info.st_mode, S_IXUSR)) {
-        fprintf(stderr, "Can not execute '%s'\n", cmd);
-        exit(EXIT_FAILURE);
-    }
-
-    tc = test_context_new(cmd, dir, use_valgrind, diff_opts);
-    failed_checks = test_context_run_tests(tc, tests, verbosity_level);
+    failed_checks = test_context_run_tests(tc, tests);
     list_destroy(tests, DESTROYFUNC(test_free));
     test_context_free(tc);
 

@@ -2,6 +2,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -26,19 +27,53 @@ struct test_context_t {
     VerbosityMode verbose;
 };
 
-TestContext * test_context_new(const char *cmd,
-                               const char *dir,
-                               int mem,
-                               char *diff_opts)
+TestContext * test_context_new(void)
 {
     TestContext *tc = calloc(sizeof(TestContext), 1);
-    tc->cmd = strdup(cmd);
     tc->verbose = MODE_NORMAL;
-    tc->dir = strdup(dir);
+    tc->dir = strdup("tests");
     tc->logs = oqueue_new();
-    tc->use_valgrind = mem;
-    tc->diff_opts = diff_opts;
     return tc;
+}
+
+int test_context_set_command(TestContext *tc, const char *cmd)
+{
+    struct stat info;
+
+    if (stat(cmd, &info) == -1) {
+        perror("stat");
+        return 0;
+    }
+    if (!FLAG_SET(info.st_mode, S_IXUSR)) {
+        fprintf(stderr, "Can not execute '%s'\n", cmd);
+        return 0;
+    }
+
+    free(tc->cmd);
+    tc->cmd = strdup(cmd);
+    return 1;
+}
+
+void test_context_set_dir(TestContext *tc, const char *dir)
+{
+    free(tc->dir);
+    tc->dir = strdup(dir);
+}
+
+void test_context_set_use_valgrind(TestContext *tc)
+{
+    tc->use_valgrind = 1;
+}
+
+void test_context_set_diff_opts(TestContext *tc, const char *opts)
+{
+    free(tc->diff_opts);
+    tc->diff_opts = strdup(opts);
+}
+
+void test_context_set_verbosity(TestContext *tc, VerbosityMode verbose)
+{
+    tc->verbose = verbose;
 }
 
 void test_context_free(TestContext *tc)
@@ -491,10 +526,9 @@ out:
 }
 
 unsigned int
-test_context_run_tests(TestContext *tc, List *tests, VerbosityMode verbose)
+test_context_run_tests(TestContext *tc, List *tests)
 {
     struct timeval ta, tb, res;
-    tc->verbose = verbose;
 
     gettimeofday(&ta, NULL);
     list_foreach(tests, CBFUNC(test_context_run_test), tc);

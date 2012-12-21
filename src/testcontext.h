@@ -16,16 +16,51 @@ typedef struct test_context_t TestContext;
 /**
  * Create new test context to run tests in.
  *
- * @param cmd       command to be tested
- * @param dir       directory where tests are stored
- * @param mem       whether to check for memory errors
- * @param diff_opts option string passed to diff (allow-none)
  * @return          new TestContext
  */
-TestContext * test_context_new(const char *cmd,
-                               const char *dir,
-                               int mem,
-                               char *diff_opts);
+TestContext * test_context_new(void);
+
+/**
+ * Set command to be tested. The passed string is tested to be path to
+ * executable file. If it fails, the function prints error message and
+ * returns zero.
+ *
+ * @param tc        test context to modify
+ * @param cmd       command to be tested
+ * @return 1 if ok, 0 if command is not executable
+ */
+int test_context_set_command(TestContext *tc, const char *cmd);
+
+/**
+ * Set directory with tests.
+ *
+ * @param tc        test context to modify
+ * @param dir       directory where tests are stored
+ */
+void test_context_set_dir(TestContext *tc, const char *cmd);
+
+/**
+ * Use Valgrind tool in the context.
+ *
+ * @param tc        test context to modify
+ */
+void test_context_set_use_valgrind(TestContext *tc);
+
+/**
+ * Set custom options to underlying diff.
+ *
+ * @param tc        test context to modify
+ * @param diff_opts option string passed to diff (allow-none)
+ */
+void test_context_set_diff_opts(TestContext *tc, const char *opts);
+
+/**
+ * Set verbosity level.
+ *
+ * @param tc        test context to modify
+ * @param verbose   level to be set
+ */
+void test_context_set_verbosity(TestContext *tc, VerbosityMode verbose);
 
 /**
  * Free memory used by TestContext.
@@ -39,10 +74,9 @@ void test_context_free(TestContext *tc);
  *
  * @param tc        context to run in
  * @param tests     tests to be executed (list of Test objects)
- * @param verbose   whether to print diffs (if any)
  * @return number of failed checks
  */
 unsigned int
-test_context_run_tests(TestContext *tc, List *tests, VerbosityMode verbose);
+test_context_run_tests(TestContext *tc, List *tests);
 
 #endif /* end of include guard: TESTCONTEXT_H */
