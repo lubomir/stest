@@ -189,11 +189,14 @@ int get_num_errors(FILE *fh, int *errors, int *contexts)
 }
 
 #define MAXLEN 512
-char * str_to_bold(const char *str)
+const char * str_to_bold(const char *str)
 {
-    static char array[MAXLEN];
-    snprintf(array, MAXLEN, "%s%s%s", BOLD, str, NORMAL);
-    return array;
+    if (isatty(STDOUT_FILENO)) {
+        static char array[MAXLEN];
+        snprintf(array, MAXLEN, "%s%s%s", BOLD, str, NORMAL);
+        return array;
+    }
+    return str;
 }
 
 void str_array_free(char **array)

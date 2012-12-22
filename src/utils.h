@@ -189,9 +189,9 @@ int get_num_errors(FILE *fh, int *errors, int *contexts);
  * should no be freed.
  *
  * @param str   string to become bold
- * @return modified string
+ * @return modified string (transfer none)
  */
-char * str_to_bold(const char *str);
+const char * str_to_bold(const char *str);
 
 /**
  * Free a NULL-terminated array of strings. If array is NULL, no action
