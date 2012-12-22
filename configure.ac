@@ -21,6 +21,8 @@ AS_IF([test "x$enable_tests" != "xno"], [
       ])
 AM_CONDITIONAL([ENABLE_TESTS], [test "x$enable_tests" != "xno"])
 
+AC_CONFIG_FILES([doc/stest.1])
+
 # Checks for header files.
 
 # Checks for typedefs, structures, and compiler characteristics.

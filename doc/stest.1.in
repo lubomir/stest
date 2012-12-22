@@ -1,0 +1,95 @@
+.TH stest 1 "December 2012" "@PACKAGE_NAME@ @VERSION@" "User Commands"
+.SH NAME
+stest - simple testing utility
+.SH SYNOPSIS
+.B stest
+[\fIOPTION\fR]... \fICOMMAND\fR [\fITEST_DIR\fR]
+.SH DESCRIPTION
+.PP
+Test COMMAND by running it with specified inputs. The output of the
+program is checked against specified files. The tests are looked for in
+TEST_DIR or \fI./tests\fR if TEST_DIR is omitted.
+.SH OPTIONS
+.PP
+Mandatory arguments to long options are mandatory for short options too.
+.TP
+\fB--diff\fR=\fIOPTIONS\fR
+pass OPTIONS to diff; see man diff(1) for available options
+.TP
+\fB-m\fR, \fB--memory\fR
+run Valgrind memory checking tool
+.TP
+\fB-v\fR, \fB--verbose\fR
+display output diff of failed tests
+.TP
+\fB-q\fR, \fB--quiet\fR
+suppress all output
+.TP
+.TP
+\fB-h\fR, \fB--help\fR
+display help
+.TP
+\fB-V\fR, \fB--version\fR
+display version info
+.SH TEST FORMAT
+.PP
+Each test is composed of multiple files with same basename. The file name
+should start with a three digit number used for running tests in the same
+order.
+.PP
+The extension of the file suggest what to do with its contents. The
+understood extensions are:
+.TP
+\fB\.in\fR
+is passed to \fIstdin\fR of the executed command. If missing,
+\fI/dev/null\fR is used.
+.TP
+\fB\.out\fR
+is expected on \fIstdout\fR of the executed command. If missing, no check
+is performed.
+.TP
+\fB\.err\fR
+is expected on \fIstderr\fR of the executed command. If missing, no check
+is performed.
+.TP
+\fB\.ret\fR
+contains one number \- the expected return value of the command. If missing,
+no check is performed.
+.TP
+\fB\.args\fR
+is parsed as command line arguments and passed to the executed command.
+If missing, no arguments are used.
+.IP
+Please note that no expansions are performed on the arguments. The first
+line of argument file is loaded and tokenized using spaces. Single and
+double quotes are respected and can be escaped with backslash.
+.SH "EXIT STATUS"
+.PP
+On success of all tests \fB0\fR is returned, otherwise the return value
+indicates number of failed tests.
+.PP
+Special values indicate bad arguments:
+.TP
+\fB253\fR
+command can not be executed
+.TP
+\fB254\fR
+no tests were loaded
+.TP
+\fB255\fR
+unrecognized options
+.SH AUTHOR
+Written by Lubomír Sedlář.
+.SH "REPORTING BUGS"
+Report stest bugs to @PACKAGE_BUGREPORT@
+.br
+Stest homepage: <http://github.com/lubomir/stest>
+.SH COPYRIGHT
+Copyright \(co 2012 Lubomír Sedlář.
+Licensed under GNU GPL license version 3 or later
+<http://gnu.org/licenses/gpl.html>.
+.br
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+.SH "SEE ALSO"
+\fBgen-test\fR(1), \fBdiff\fR(1)

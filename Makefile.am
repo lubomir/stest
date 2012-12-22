@@ -24,6 +24,8 @@ gen_test_SOURCES = src/gen-test.c \
 		   src/utils.c
 gen_test_CFLAGS = ${AM_CFLAGS}
 
+include doc/Makefile.include
+
 if ENABLE_TESTS
 include tests/Makefile.include
 endif
