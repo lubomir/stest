@@ -6,7 +6,7 @@
 #define call_count_lines(str) count_lines(str, strlen(str))
 
 void
-test_count_lines()
+test_count_lines(void)
 {
     cut_assert_equal_uint(0, call_count_lines("foo bar"));
     cut_assert_equal_uint(1, call_count_lines("foo\nbar"));
@@ -18,7 +18,7 @@ test_count_lines()
 }
 
 void
-test_number_sort()
+test_number_sort(void)
 {
     cut_assert_equal_int(0, number_sort("001_file1", "001_file2"));
     cut_assert_equal_int(-1, number_sort("001_file1", "002_file2"));
@@ -34,7 +34,7 @@ test_number_sort()
 }
 
 void
-test_filter_tests()
+test_filter_tests(void)
 {
     cut_assert_equal_int(1, filter_tests("1_file1"));
     cut_assert_equal_int(3, filter_tests("001_file1"));
@@ -45,7 +45,7 @@ test_filter_tests()
 }
 
 void
-test_get_test_part_ok()
+test_get_test_part_ok(void)
 {
     cut_assert_equal_uint(TEST_INPUT, get_test_part("001_file.in"));
     cut_assert_equal_uint(TEST_OUTPUT, get_test_part("001_file.out"));
@@ -55,7 +55,7 @@ test_get_test_part_ok()
 }
 
 void
-test_get_test_part_multiple_exts()
+test_get_test_part_multiple_exts(void)
 {
     cut_assert_equal_uint(TEST_INPUT, get_test_part("001_file.out.in"));
     cut_assert_equal_uint(TEST_OUTPUT, get_test_part("001_file.in.out"));
@@ -65,7 +65,7 @@ test_get_test_part_multiple_exts()
 }
 
 void
-test_get_test_part_bad()
+test_get_test_part_bad(void)
 {
     cut_assert_equal_uint(TEST_UNKNOWN, get_test_part(NULL));
 
@@ -79,7 +79,7 @@ test_get_test_part_bad()
 }
 
 void
-test_get_filepath_ok()
+test_get_filepath_ok(void)
 {
     char *path;
     path = get_filepath("dir", "file", "txt");
@@ -92,7 +92,7 @@ test_get_filepath_ok()
 }
 
 void
-test_get_filepath_failure()
+test_get_filepath_failure(void)
 {
     cut_assert_null(get_filepath(NULL, "file", "txt"));
     cut_assert_null(get_filepath("dir", NULL, "txt"));
@@ -101,7 +101,7 @@ test_get_filepath_failure()
 
 #define write_data(fd, str) write(fd, str, strlen(str) * sizeof(char))
 void
-test_count_lines_on_fd_no_lines()
+test_count_lines_on_fd_no_lines(void)
 {
     int from[2];
     pipe(from);
@@ -114,7 +114,7 @@ test_count_lines_on_fd_no_lines()
 }
 
 void
-test_count_lines_on_fd_more_lines()
+test_count_lines_on_fd_more_lines(void)
 {
     int from[2];
 
@@ -130,7 +130,7 @@ test_count_lines_on_fd_more_lines()
 }
 
 void
-test_parse_args_single()
+test_parse_args_single(void)
 {
     char *expected[] = { "foo", NULL };
     char *tests[] = {"foo", "  foo", "foo  ", "  foo  ", NULL};
@@ -145,7 +145,7 @@ test_parse_args_single()
 }
 
 void
-test_parse_args_double()
+test_parse_args_double(void)
 {
     char *expected[] = { "foo", "bar", NULL };
     char *tests[] = { "foo bar", "  foo bar", "foo  bar", "foo bar  ",
@@ -161,7 +161,7 @@ test_parse_args_double()
 }
 
 void
-test_parse_args_escaped()
+test_parse_args_escaped(void)
 {
     char *expected[] = { "foo", "bar", "baz quux", NULL };
     char *tests[] = {
@@ -183,7 +183,7 @@ test_parse_args_escaped()
 }
 
 void
-test_parse_args_complicated()
+test_parse_args_complicated(void)
 {
     char *expected[] = { "\\", "'foo'", "bar\"baz", NULL };
     char *tests[] = {
@@ -204,7 +204,7 @@ test_parse_args_complicated()
 }
 
 void
-test_parse_args_empty()
+test_parse_args_empty(void)
 {
     char *tests[] = { "", " ", "''", "\"\"", NULL };
     char *expected[] = { NULL };
@@ -221,7 +221,7 @@ test_parse_args_empty()
 }
 
 void
-test_parse_args_malformed()
+test_parse_args_malformed(void)
 {
     char *tests[] = {
         "\"",
@@ -247,7 +247,7 @@ test_parse_args_malformed()
 }
 
 void
-test_parse_args_many()
+test_parse_args_many(void)
 {
     char *expected[] = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j",
         "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x",
@@ -261,7 +261,7 @@ test_parse_args_many()
 }
 
 void
-test_parse_args_long()
+test_parse_args_long(void)
 {
     char *expected[] = { "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
         "1234567890987654321", NULL };
@@ -271,7 +271,7 @@ test_parse_args_long()
 }
 
 void
-test_parse_args_len()
+test_parse_args_len(void)
 {
     char *expected1[] = { "foo", NULL };
     char *expected2[] = { "foo", "bar", NULL };

@@ -16,7 +16,7 @@ char buffer[BUF_SIZE];
 OQueue *queue;
 
 void
-cut_setup()
+cut_setup(void)
 {
     int fd = mkstemp(filename);
     close(fd);
@@ -25,7 +25,7 @@ cut_setup()
 }
 
 void
-cut_teardown()
+cut_teardown(void)
 {
     fclose(output);
     unlink(filename);
@@ -33,7 +33,7 @@ cut_teardown()
     queue = NULL;
 }
 
-char * load_output()
+char * load_output(void)
 {
     memset(buffer, 0, BUF_SIZE * sizeof(char));
     rewind(output);
@@ -44,7 +44,7 @@ char * load_output()
 }
 
 void
-test_push_single_line()
+test_push_single_line(void)
 {
     oqueue_push(queue, "line");
     oqueue_flush(queue, output);
@@ -52,7 +52,7 @@ test_push_single_line()
 }
 
 void
-test_push_more_lines()
+test_push_more_lines(void)
 {
     oqueue_push(queue, "line\n");
     oqueue_push(queue, "second\n");
@@ -62,7 +62,7 @@ test_push_more_lines()
 }
 
 void
-test_push_many_lines()
+test_push_many_lines(void)
 {
     char *parts[] = { "first\n", "second\n", "foo", "\n", "bar", "\n", "baz",
         "\n", "quux", "\n", "very long line\n",
@@ -84,7 +84,7 @@ test_push_many_lines()
 
 #define write_data(fd, str) write(fd, str, strlen(str) * sizeof(char))
 void
-test_copy_from_fd()
+test_copy_from_fd(void)
 {
     int from[2];
     pipe(from);
@@ -100,7 +100,7 @@ test_copy_from_fd()
 }
 
 void
-test_copy_data_more_lines()
+test_copy_data_more_lines(void)
 {
     int from[2];
 
@@ -119,7 +119,7 @@ test_copy_data_more_lines()
 }
 
 void
-test_push_formatted_no_args()
+test_push_formatted_no_args(void)
 {
     oqueue_pushf(queue, "hello\n");
     oqueue_flush(queue, output);
@@ -127,7 +127,7 @@ test_push_formatted_no_args()
 }
 
 void
-test_push_formatted_simple()
+test_push_formatted_simple(void)
 {
     oqueue_pushf(queue, "int %d\n", 5);
     oqueue_flush(queue, output);
@@ -139,7 +139,7 @@ test_push_formatted_simple()
 }
 
 void
-test_push_formatted_many()
+test_push_formatted_many(void)
 {
     oqueue_pushf(queue, "int %d\nstring %s\nanother string %s\nnext int %d",
             5, "foo", "bar", 0);

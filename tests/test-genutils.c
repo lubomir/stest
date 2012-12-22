@@ -4,7 +4,7 @@
 #include <genutils.h>
 
 void
-test_sanitize_test_name()
+test_sanitize_test_name(void)
 {
     char test[128];
     strcpy(test, "test name");

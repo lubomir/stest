@@ -5,7 +5,7 @@
 #define POINTER_TO_INT(p) (int)(long)p
 
 void
-test_prepending_into_null()
+test_prepending_into_null(void)
 {
     int x = 0;
     List *l = list_prepend(NULL, &x);
@@ -15,7 +15,7 @@ test_prepending_into_null()
 }
 
 void
-test_append_to_null()
+test_append_to_null(void)
 {
     int x = 0;
     List *l = list_append(NULL, &x);
@@ -25,7 +25,7 @@ test_append_to_null()
 }
 
 void
-test_two_prepends()
+test_two_prepends(void)
 {
     int x, y;
     List *l = list_prepend(NULL, &x);
@@ -38,7 +38,7 @@ test_two_prepends()
 }
 
 void
-test_two_appends()
+test_two_appends(void)
 {
     List *l = list_append(NULL, INT_TO_POINTER(1));
     cut_assert_not_null(l);
@@ -53,7 +53,7 @@ test_two_appends()
 }
 
 void
-test_reverse_list()
+test_reverse_list(void)
 {
     List *l = list_prepend(NULL, INT_TO_POINTER(1));
     l = list_prepend(l, INT_TO_POINTER(2));
@@ -77,7 +77,7 @@ void foreach_cb(void *item, void *data)
     *dest = *dest + i;
 }
 
-void test_list_foreach()
+void test_list_foreach(void)
 {
     List *l = list_prepend(NULL, INT_TO_POINTER(1));
     l = list_prepend(l, INT_TO_POINTER(2));
