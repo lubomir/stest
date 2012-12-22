@@ -5,6 +5,7 @@
 
 #include <dirent.h>
 #include <stdio.h>
+#include <sys/time.h>
 
 /**
  * Compare two filenames based on leading digits.
@@ -199,5 +200,18 @@ char * str_to_bold(const char *str);
  * @param array     NULL-terminated array to be freed (allow-none)
  */
 void str_array_free(char **array);
+
+/**
+ * Subtract time value in b from the time value in a, and place result
+ * to the place pointed to by res. The result is normalized such that
+ * res->tv_usec is in the range 0 to 999,999.
+ *
+ * This function is equivalent to timersub(3).
+ *
+ * @param a     first time value
+ * @param b     second time value
+ * @param res   place where to store result (out)
+ */
+void time_difference(struct timeval *a, struct timeval *b, struct timeval *res);
 
 #endif /* end of include guard: UTILS_H */

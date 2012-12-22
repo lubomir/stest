@@ -290,3 +290,25 @@ test_parse_args_len()
                 cut_message("Input -%s-", tests[i]));
     }
 }
+
+void
+test_timersub(void)
+{
+    struct timeval a, b, res;
+
+    a.tv_sec = 1;
+    a.tv_usec = 1;
+    b.tv_sec = 0;
+    b.tv_usec = 0;
+    time_difference(&a, &b, &res);
+    cut_assert_equal_int(1, res.tv_sec);
+    cut_assert_equal_int(1, res.tv_usec);
+
+    a.tv_sec = 10;
+    a.tv_usec = 0;
+    b.tv_sec = 0;
+    b.tv_usec = 100;
+    time_difference(&a, &b, &res);
+    cut_assert_equal_int(9, res.tv_sec);
+    cut_assert_equal_int(999900, res.tv_usec);
+}

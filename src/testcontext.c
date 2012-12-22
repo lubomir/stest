@@ -1,9 +1,10 @@
+#define _POSIX_C_SOURCE 200809L
+
 #include <fcntl.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <sys/time.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -524,7 +525,7 @@ test_context_run_tests(TestContext *tc, List *tests)
     gettimeofday(&ta, NULL);
     list_foreach(tests, CBFUNC(test_context_run_test), tc);
     gettimeofday(&tb, NULL);
-    timersub(&tb, &ta, &res);
+    time_difference(&tb, &ta, &res);
 
     if (!TC_IS_QUIET(tc)) {
         printf("\n\n");
