@@ -1,4 +1,6 @@
 #include <cutter.h>
+#include <string.h>
+
 #include <genutils.h>
 
 void

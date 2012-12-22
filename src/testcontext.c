@@ -158,14 +158,14 @@ test_context_check_return_code(TestContext *tc, Test *test, int status)
 static char **
 test_context_get_diff_cmd(TestContext *tc, const char *orig, const char *real)
 {
-    const char const *template = "diff -u -d --label=expected --label=actual";
+    const char * const template = "diff -u -d --label=expected --label=actual";
     size_t len;
     char *cmd, **args;
 
     len = strlen(template) + strlen(orig) + strlen(real) + 10;
     len += tc->diff_opts != NULL ? strlen(tc->diff_opts) : 0;
     cmd = calloc(1, len);
-    snprintf(cmd, len, "%s %s %s %s",
+    sprintf(cmd, "%s %s %s %s",
             template,
             tc->diff_opts ? tc->diff_opts : "",
             orig, real);
@@ -247,7 +247,7 @@ test_context_analyze_memory(TestContext *tc, Test *t, char *file)
     int errors, contexts;
     FILE *fh = fopen(file, "r");
     if (!get_num_errors(fh, &errors, &contexts)) {
-        // log failure to parse
+        /* log failure to parse */
         goto out;
     }
 
