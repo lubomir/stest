@@ -12,7 +12,8 @@ for these files is a tests/ subdirectory.
 .ret    contains expected exit code
 
 Use the gen-test utility to easily generate these tests. Both gen-test and
-stest have some help available with --help option.
+stest have some help available with --help option. Man pages are installed
+as well.
 
 ## Output checking
 
@@ -46,4 +47,3 @@ In source directory, run
  + proper plurals in messages: contexts, lines
  + full l10n maybe?
  + run tests in a temporary directory
- + add man pages
