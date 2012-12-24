@@ -1,0 +1,64 @@
+.TH gen-test 1 "December 2012" "@PACKAGE_NAME@ @VERSION@" "User Commands"
+.SH NAME
+gen-test - simple testing utility
+.SH SYNOPSIS
+.B gen-test
+[\fIOPTION\fR]... [\fITEST_DIR\fR]
+.SH DESCRIPTION
+.PP
+Genereate tests for \fBstest\fR(1). The tests are placed in TEST_DIR, falling
+back on \fI./tests\fR, if TEST_DIR is not supplied.
+.SH OPTIONS
+.PP
+Mandatory arguments to long options are mandatory for short options too.
+.TP
+\fB-l\fR, \fB--list\fR
+list all existing tests and their parts
+.TP
+\fB-i\fR
+load standard input from console
+.TP
+\fB--input\fR=\fIFILE\fR
+copy standard input from FILE
+.TP
+\fB-o\fR
+load standard output from console
+.TP
+\fB--output\fR=\fIFILE\fR
+copy standard output from FILE
+.TP
+\fB-e\fR
+load standard error output from console
+.TP
+\fB--errors\fR=\fIFILE\fR
+copy standard error output from FILE
+.TP
+\fB-a\fR, \fB--args\fR=\fIARGS\fR
+pass ARGS as command line options
+.TP
+\fB-r\fR, \fB--retval\fR=\fICODE\fR
+expect program to exit with CODE
+.TP
+\fB-h\fR, \fB--help\fR
+display help
+.TP
+\fB-V\fR, \fB--version\fR
+display version info
+.SH "EXIT STATUS"
+.PP
+On success, gen-test returns 0. If anything goes wrong, it returns 1.
+.SH AUTHOR
+Written by Lubomír Sedlář.
+.SH "REPORTING BUGS"
+Report stest bugs to @PACKAGE_BUGREPORT@
+.br
+Stest homepage: <http://github.com/lubomir/stest>
+.SH COPYRIGHT
+Copyright \(co 2012 Lubomír Sedlář.
+Licensed under GNU GPL license version 3 or later
+<http://gnu.org/licenses/gpl.html>.
+.br
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+.SH "SEE ALSO"
+\fBstest\fR(1)

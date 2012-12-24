@@ -21,7 +21,7 @@ AS_IF([test "x$enable_tests" != "xno"], [
       ])
 AM_CONDITIONAL([ENABLE_TESTS], [test "x$enable_tests" != "xno"])
 
-AC_CONFIG_FILES([doc/stest.1])
+AC_CONFIG_FILES([doc/stest.1 doc/gen-test.1])
 
 # Checks for header files.
 
