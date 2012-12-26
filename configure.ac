@@ -23,6 +23,8 @@ AM_CONDITIONAL([ENABLE_TESTS], [test "x$enable_tests" != "xno"])
 
 AC_CONFIG_FILES([doc/stest.1 doc/gen-test.1])
 
+AC_DEFINE([_POSIX_C_SOURCE], [200809L], [We want some POSIX functions])
+
 # Checks for header files.
 
 # Checks for typedefs, structures, and compiler characteristics.
