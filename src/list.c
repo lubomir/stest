@@ -1,3 +1,5 @@
+#include <config.h>
+
 #include "list.h"
 
 List * list_prepend(List *list, void *data)

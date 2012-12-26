@@ -1,3 +1,5 @@
+#include <config.h>
+
 #include "genutils.h"
 
 #include <ctype.h>
