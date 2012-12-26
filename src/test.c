@@ -1,12 +1,10 @@
 #include <config.h>
 
-#include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "test.h"
 #include "utils.h"
+
+#include <fcntl.h>
+#include <string.h>
 
 List * test_load_from_dir(const char *dir)
 {

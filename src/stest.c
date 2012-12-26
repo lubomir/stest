@@ -1,14 +1,12 @@
 #include <config.h>
 
-#include <errno.h>
-#include <getopt.h>
-#include <stdio.h>
-#include <sys/stat.h>
-
 #include "list.h"
 #include "test.h"
 #include "testcontext.h"
 #include "utils.h"
+
+#include <errno.h>
+#include <getopt.h>
 
 #define OPTSTRING "hmvqV"
 

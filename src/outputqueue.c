@@ -1,10 +1,10 @@
 #include <config.h>
 
-#include <unistd.h>
-#include <string.h>
-
 #include "outputqueue.h"
 #include "utils.h"
+
+#include <string.h>
+#include <unistd.h>
 
 struct oqueue_t {
     List *data;

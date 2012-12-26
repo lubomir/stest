@@ -1,18 +1,14 @@
 #include <config.h>
 
-#include <fcntl.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <unistd.h>
-
 #include "outputqueue.h"
 #include "test.h"
 #include "testcontext.h"
 #include "utils.h"
+
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 struct test_context_t {
     char *cmd;

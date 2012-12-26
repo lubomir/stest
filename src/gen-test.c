@@ -5,8 +5,6 @@
 #include "test.h"
 
 #include <getopt.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 #if defined(__GNUC__)
 #  define UNUSED(x) x __attribute__((unused))

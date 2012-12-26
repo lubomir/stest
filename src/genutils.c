@@ -6,7 +6,6 @@
 #include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 char * sanitize_test_name(char *name)
 {

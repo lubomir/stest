@@ -1,13 +1,11 @@
 #include <config.h>
 
-#include <stdio.h>
-#include <ctype.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "list.h"
 #include "utils.h"
+
+#include <ctype.h>
+#include <unistd.h>
+#include <string.h>
 
 int number_sort_wrap(const struct dirent **entry1, const struct dirent **entry2)
 {
