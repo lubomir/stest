@@ -26,7 +26,7 @@ use --diff=OPT. Useful options include -w for ignoring whitespace changes.
 Build dependencies of stest are a C compiler, Cutter unit testing library and
 libtool. All these dependencies should be checked for by configure script.
 
-There are also runtime dependecies: diff and optionally Valgrind for checking
+There are also runtime dependencies: diff and optionally Valgrind for checking
 memory errors.
 
 # Building
