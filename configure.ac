@@ -32,12 +32,15 @@ AC_DEFINE([_POSIX_C_SOURCE], [200809L], [We want some POSIX functions])
 
 # Does compiler support -Wall
 AC_MSG_CHECKING(whether compiler understands -Wall)
-old_AM_CFLAGS="$AM_CFLAGS"
+old_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -Wall"
 AC_TRY_COMPILE([],[],
-               AC_MSG_RESULT(yes),
+               AC_MSG_RESULT(yes)
+               AM_CFLAGS="$AM_CFLAGS -Wall"
+               AC_SUBST(AM_CFLAGS),
                AC_MSG_RESULT(no)
-               AM_CFLAGS="$old_AM_CFLAGS")
+               )
+CFLAGS="$old_CFLAGS"
 
 # Checks for library functions.
 
