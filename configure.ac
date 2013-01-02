@@ -18,6 +18,7 @@ AC_ARG_ENABLE([tests],
 
 AS_IF([test "x$enable_tests" != "xno"], [
       AC_CHECK_CUTTER
+      enable_tests="yes"
       ])
 AM_CONDITIONAL([ENABLE_TESTS], [test "x$enable_tests" != "xno"])
 
@@ -41,3 +42,10 @@ AC_TRY_COMPILE([],[],
 # Checks for library functions.
 
 AC_OUTPUT([Makefile])
+
+echo ""
+echo "Stest $VERSION"
+echo ""
+echo " Prefix.....................: ${prefix}"
+echo " Compiler flags.............: ${CFLAGS}"
+echo " Enable test suite..........: ${enable_tests}"
