@@ -13,6 +13,9 @@ AC_PROG_CC
 AM_PROG_CC_C_O
 AC_PROG_LIBTOOL
 
+# Checks whether compiler supports -Wall
+CC_HAS_WALL
+
 AC_ARG_ENABLE([tests],
               AS_HELP_STRING([--disable-tests], [disable building tests]))
 
@@ -29,18 +32,6 @@ AC_DEFINE([_POSIX_C_SOURCE], [200809L], [We want some POSIX functions])
 # Checks for header files.
 
 # Checks for typedefs, structures, and compiler characteristics.
-
-# Does compiler support -Wall
-AC_MSG_CHECKING(whether compiler understands -Wall)
-old_CFLAGS="$CFLAGS"
-CFLAGS="$CFLAGS -Wall"
-AC_TRY_COMPILE([],[],
-               AC_MSG_RESULT(yes)
-               AM_CFLAGS="$AM_CFLAGS -Wall"
-               AC_SUBST(AM_CFLAGS),
-               AC_MSG_RESULT(no)
-               )
-CFLAGS="$old_CFLAGS"
 
 # Checks for library functions.
 
